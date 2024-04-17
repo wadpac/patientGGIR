@@ -1,0 +1,17 @@
+Package: patientGGIR
+Type: Package
+Title: Creat Patient Reports From GGIR Output
+Version: 0.0.1
+Date: 2024-04-17
+Authors@R: c(person("Vincent T","van Hees",role=c("aut","cre"),
+                  email="v.vanhees@accelting.com"))
+Maintainer: Vincent T van Hees <v.vanhees@accelting.com>
+Description: Creates patient reports from output generated with R package GGIR <https://CRAN.R-project.org/package=GGIR>.
+URL: https://github.com/wadpac/patientGGIR/
+BugReports: https://github.com/wadpac/patientGGIR/issues
+License: Apache License (== 2.0)
+Suggests: testthat
+Imports: kableExtra, dplyr,extrafont
+Depends: utils, R (>= 3.5.0)
+Encoding: UTF-8
+RoxygenNote: 7.3.1

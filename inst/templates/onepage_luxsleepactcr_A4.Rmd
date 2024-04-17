@@ -1,0 +1,184 @@
+---
+geometry: margin=1cm
+output: pdf_document
+classoption: a4paper
+title: "`r docTitle`"
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{longtable}
+- \usepackage{array}
+- \usepackage{multirow}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+- \usepackage{titlesec}
+- \titlespacing{\title}{0pt}{\parskip}{-\parskip}
+---
+
+\vspace{-10truemm}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, echo = FALSE, results="asis"}
+P4N = read.csv(file = paste0(GGIRoutputdir, "/results/part4_nightsummary_sleep_cleaned.csv"))
+date = min(P4N[grep(pattern = id, x = P4N$ID), "calendar_date"])
+
+
+if (lang == "en") {
+  cat(paste0("### You wore a motion sensor watch on your wrist for several days from ", date, "\n"))
+    cat("The motion sensor watch recorded the different accelerations of your wrist. This allowed us to accurately assess your physical activity and sleep time over this period. The watch also measured the intensity of the light.
+
+These data are collected as part of research with the aim of improving knowledge on circadian rhythm alterations in memory center patients and thus providing better management of their symptoms, improving the quality of life of patients. and their loved ones, and potentially slow the progression of the disease.
+
+In this document we offer you a description of what the watch measured when you wore it. The extraction of these measures is still under development. Furthermore, these results taken individually only have an informative value and are only of interest when they are analyzed in a study population.\n")
+}
+
+
+if (lang == "fr") {
+  cat(paste0("### Vous avez port\u00E9 une montre capteur de mouvement \u00E0 votre poignet pendant plusieurs jours \u00E0 partir du ", date, "\n"))
+  cat("La montre capteur de mouvement a enregistr\u00E9 les diff\u00E9rentes acc\u00E9l\u00E9rations de votre poignet. Cela nous a permis d'\u00E9valuer votre activit\u00E9 physique et votre temps de sommeil avec pr\u00E9cision sur cette p\u00E9riode. La montre a mesur\u00E9 \u00E9galement l'intensit\u00E9 de la lumi\u\u00E8re.
+
+Ces donn\u00E9es sont recueillies dans le cadre de la recherche avec pour objectif d'am\u00E9liorer les connaissances sur les alt\u00E9rations du rythme circadien chez les patients de centre m\u00E9moire et ainsi de proposer une meilleure prise en charge de leurs symptômes, am\u00E9liorer la qualit\u00E9 de vie des patients et de leurs proches, et potentiellement ralentir l'\u00E9volution de la maladie.
+
+Nous vous proposons dans ce document un descriptif de ce qu'a mesur\u00E9 la montre lorsque vous la portiez. L'extraction de ces mesures est encore en cours d'\u00E9laboration. De plus ces r\u00E9sultats pris individuellement n'ont qu'une valeur informative et n'ont d'int\u00E9rêt que lorsqu'ils sont analys\u00E9s dans une population d'\u00E9tude.\n")
+}
+```
+
+
+
+```{r, echo = FALSE}
+# Load all GGIR results
+P2D = read.csv(file = paste0(GGIRoutputdir, "/results/part2_daysummary.csv"))
+P2D = P2D[grep(pattern = id, x = P2D$ID), c("M5hr_ENMO_mg_0.24hr",
+                                            "weekday", "calendar_date")]
+P2D = P2D[!is.na(P2D$M5hr_ENMO_mg_0.24hr),]
+
+P4N = read.csv(file = paste0(GGIRoutputdir, "/results/part4_nightsummary_sleep_cleaned.csv"))
+P4N = P4N[grep(pattern = id, x = P4N$ID), c("sleeponset_ts",
+                                            "wakeup_ts",
+                                            "SptDuration",
+                                            "SleepDurationInSpt", "weekday", "calendar_date")]
+
+P5D = read.csv(file = paste0(GGIRoutputdir, "/results/part5_daysummary_WW_L40M100V400_T5A5.csv"))
+P5D = P5D[grep(pattern = id, x = P5D$ID), c("dur_day_total_MOD_min",
+                                            "dur_day_total_LIG_min",
+                                            "dur_day_total_IN_min",
+                                            "weekday", "calendar_date")]
+summaryColumn = rep("", 10)
+
+P5D$calendar_date = as.Date(P5D$calendar_date, format = "%Y-%m-%d")
+# Sleep
+shortenTime = function(time) {
+  return(paste0(unlist(strsplit(time, ":"))[1:2], collapse = ":"))
+}
+P4N$sleeponset_ts = unlist(lapply(X = P4N$sleeponset_ts, FUN = shortenTime))
+P4N$wakeup_ts = unlist(lapply(X = P4N$wakeup_ts, FUN = shortenTime))
+P4N$calendar_date = as.Date(P4N$calendar_date, format = "%d/%m/%Y")
+names(P4N)[grep(pattern = "sleeponset_ts", x = names(P4N))] = "Heure de l'endormissement" #Bed time / Onset?
+names(P4N)[grep(pattern = "wakeup_ts", x = names(P4N))] = "Heure du r\u00E9veil" #Wake up
+P4N$ratio = paste0(round((P4N$SleepDurationInSpt / P4N$SptDuration) * 100), "%")
+
+readableHours = function(hours) {
+  HR = floor(hours)
+  MINS = floor((hours - HR) * 60)
+  MINS = paste0(ifelse(MINS < 10, yes = "0", no = ""), MINS)
+  return(paste0(HR, "h", MINS, "min"))
+}
+summaryColumn[1] = "Moyenne" #sur les 7 jours
+summaryColumn[4] = readableHours(mean(P4N$SptDuration, rm.na = TRUE))
+summaryColumn[5] = readableHours(mean(P4N$SleepDurationInSpt, rm.na = TRUE))
+summaryColumn[6] = paste0(round(mean((P4N$SleepDurationInSpt / P4N$SptDuration) * 100,
+                               rm.na = TRUE)), "%")
+
+P4N$SptDuration = unlist(lapply(X = P4N$SptDuration, FUN = readableHours))
+P4N$SleepDurationInSpt = unlist(lapply(X = P4N$SleepDurationInSpt, FUN = readableHours))
+
+names(P4N)[grep(pattern = "SptDuration", x = names(P4N))] = "Nombre d'heures pass\u00E9es au lit"
+names(P4N)[grep(pattern = "SleepDurationInSpt", x = names(P4N))] = "Nombre d'heures pass\u00E9es \u00E0 dormir"
+names(P4N)[grep(pattern = "ratio", x = names(P4N))] = "Proportion de temps dormi par rapport au temps pass\u00E9 au lit"
+P4N = P4N[order(P4N$calendar_date), ]
+
+# Physical activity
+modvar = grep(pattern = "total_MOD", x = names(P5D))
+ligvar = grep(pattern = "total_LIG", x = names(P5D))
+invar = grep(pattern = "total_IN", x = names(P5D))
+summaryColumn[7] = readableHours(mean(P5D[, modvar], rm.na = TRUE) / 60)
+summaryColumn[8] = readableHours(mean(P5D[, ligvar], rm.na = TRUE) / 60)
+summaryColumn[9] = readableHours(mean(P5D[, invar], rm.na = TRUE) / 60)
+
+P5D[, modvar] = unlist(lapply(X = P5D[, modvar] / 60, FUN = readableHours))
+P5D[, ligvar] = unlist(lapply(X = P5D[, ligvar] / 60, FUN = readableHours))
+P5D[, invar] = unlist(lapply(X = P5D[, invar] / 60, FUN = readableHours))
+
+names(P5D)[modvar] = "Nombre d'heures d'activit\u00E9 mod\u00E9r\u00E9e" #Time in moderate activity
+names(P5D)[ligvar] = "Nombre d'heures d'activit\u00E9 l\u00E9g\u00E8re" #Time in light activity"
+names(P5D)[invar] = "Temps inactif ou de repos" #Time in inactivity
+P5D = P5D[order(P5D$calendar_date), ]
+
+# M5 timing
+M5HR = floor(P2D$M5hr_ENMO_mg_0.24hr)
+M5MIN = floor((P2D$M5hr_ENMO_mg_0.24hr - M5HR) * 60)
+P2D$M5hr_ENMO_mg_0.24hr = paste0(M5HR, ":", ifelse(M5MIN < 10, yes = "0", no = ""), M5MIN)
+
+P2D$calendar_date = as.Date(P2D$calendar_date, format = "%Y-%m-%dT")
+
+names(P2D)[grep(pattern = "M5hr_ENMO_mg_0.24hr", x = names(P2D))] = "D\u00E9but de la p\u00E9riode de 5 heures la plus active"
+
+
+daydata = merge(P4N, P5D, by = c( "calendar_date","weekday")) #
+daydata = merge(daydata, P2D, by = c("calendar_date", "weekday")) #,
+daydata = daydata[order(daydata$calendar_date), ]
+daydata = daydata[, grep(pattern = "calendar", x = colnames(daydata), invert = TRUE)]
+
+# Translate
+weekday_English = c("Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+weekday_French = c("Samedi", "Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi")
+for (i in 1:7) {
+  daydata$weekday = gsub(pattern = weekday_English[i], replacement = weekday_French[i], x = daydata$weekday)
+}
+
+daydata = cbind(t(daydata), summaryColumn)
+daydata = rbind(daydata[1,],
+                rep("", ncol(daydata)),
+                daydata[2:6,],
+                rep("", ncol(daydata)),
+                daydata[7:nrow(daydata),])
+row.names(daydata)[c(2, 8)] = c("Sommeil noturne:", "Activit\u00E9 en journ\u00E9e:")
+
+row.names(daydata)[grep(pattern = "weekday", x = row.names(daydata))] = "Day of the week"
+colnames(daydata) = daydata[1,]
+daydata = daydata[-1,]
+
+# Write table to report
+kableExtra::kbl(daydata, booktabs = TRUE) %>%
+  kableExtra::kable_styling(latex_options = c("striped", "hold_position"), full_width = FALSE) %>%
+  footnote(general = paste0("ID: ", id),
+           footnote_as_chunk = TRUE) %>%
+  column_spec(1, width = "6cm") %>%
+  row_spec(0, bold = TRUE) %>%
+  row_spec(1, bold = TRUE) %>%
+  row_spec(7, bold = TRUE) %>%
+  kable_styling(font_size = 8)
+
+```
+
+```{r, echo = FALSE, fig.fullwidth=TRUE, fig.align = "left"}
+# Create png file with plot
+
+png(filename = plotfile,
+      width = 8, height = 4.5, res = 300, units = "in")
+plot_lux_sleep_act_cr(GGIRoutputdir = GGIRoutputdir, id = id, lang = lang, desiredtz = desiredtz)
+invisible(dev.off())
+
+# Import plot 
+knitr::include_graphics(plotfile)
+```

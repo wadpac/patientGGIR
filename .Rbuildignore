@@ -1,0 +1,6 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.github
+prepareNewRelease.R
+LICENSE
+codecov.yml
