@@ -13,7 +13,7 @@
 - Inside RStudio:
   
 ```
-install.packages("remotes")
+install.packages(pkgs = c("remotes", "knitr", "rmarkdown"),  dependencies = TRUE)
 remotes::install_github("wadpac/patientGGIR")
 ```
 
