@@ -6,15 +6,15 @@
 
 - Install: https://miktex.org/download
 - When installing on Windows:
-  - Inside MIktex Console
-  - Under package, find `tabu`
+  - Inside Miktex Console
+  - Inside MikTex and under package, find `tabu`.
   - Click it, and press the "plus" to install it
   
 - Inside RStudio:
   
 ```
-install.packages(pkgs = c("remotes", "knitr", "rmarkdown"),  dependencies = TRUE)
-remotes::install_github("wadpac/patientGGIR")
+install.packages(pkgs = "remotes",  dependencies = TRUE)
+remotes::install_github("wadpac/patientGGIR", dependencies = TRUE)
 ```
 
 ## Usage
