@@ -15,7 +15,7 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
   P1 = dir(paste0(GGIRoutputdir, "/meta/basic"), full.names = T)
   path = paste0(GGIRoutputdir, "/meta/ms2.out")
   mdat = SUM = NULL
- 
+  
   # Define multilingual labels
   labels = matrix("", 13, 2)
   labels[1, ] = c("Exposition\n\u00E0 la lumiere", "Light exposure\nduring night") #00E0 is à
@@ -44,6 +44,11 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
   
   reso = 300
   par(mfcol = c(4, 1), omi = rep(0, 4), oma = c(0, 9, 0, 4), mar = c(4, 4.5, 2, 9))
+  
+  # identify dates that will be table
+  P5D = read.csv(file = paste0(GGIRoutputdir, "/results/part5_daysummary_WW_L40M100V400_T5A5.csv"))
+  dates_in_table = as.Date(P5D[grep(pattern = id, x = P5D$ID), "calendar_date"])
+  
   if (length(grep(pattern = "[.]RData", x = P5ts[grep(id, P5ts)])) > 0) {
     load(file = P5ts[grep(id, P5ts)])
     D = mdat
@@ -58,11 +63,22 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
   D = aggregate(D[,c("ACC","window","sib","SleepPeriodTime")], by = list(D$timenum), FUN = mean)
   colnames(D)[1] = "timenum"
   D$time = as.POSIXlt(D$timenum, tz = desiredtz, origin = "1970-1-1")
+  # Constrain time series to date range as found in cleaned part 5 report
+  constrainDates = function(x, timecol = "time", dateRange) {
+    x = x[which(as.Date(x[, timecol]) >= dateRange[1] &
+                  as.Date(x[, timecol]) <= dateRange[2]), ]
+  }
+  D = constrainDates(x = D, timecol = "time", dateRange = range(dates_in_table))
+
+  
   D$clocktime = format(D$time,"%H:%M")
   D$sib = round(D$sib)
   D$sib[which(D$SleepPeriodTime == 0)] = 0
   M$metashort$timestamp = as.POSIXlt(M$metashort$timestamp,
                                      format = "%Y-%m-%dT%H:%M:%S%z", desiredtz)
+  # Constrain time series to date range as found in cleaned part 5 report
+  M$metashort = constrainDates(x = M$metashort, timecol = "timestamp", dateRange = range(dates_in_table))
+  M$metalong = constrainDates(x = M$metalong, timecol = "timestamp", dateRange = range(dates_in_table))
   LUXTEMP = M$metalong
   Mshort = M$metashort
   
@@ -108,12 +124,22 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
   Mshort = Mshort[which(Mshort$timestamp >= minT & Mshort$timestamp <= maxT),]
   LUXTEMP = LUXTEMP[which(LUXTEMP$timestamp >= minT & LUXTEMP$timestamp <= maxT),]
   # tickmarks = which(D$clocktime == "00:00" | D$clocktime == "12:00")
-  tickmarks = which(D$clocktime == "00:00") # long tickmarks
+  tickmarks = which(D$clocktime == "00:00" & D$windwow) # long tickmarks
   timeat = D$time[tickmarks]
   timeval = D$clocktime[tickmarks]
   tickmarks2 = which(D$clocktime == "12:00")
   timeat2 = D$time[tickmarks2]
-  timeval2 = D$window[tickmarks2]
+  wkday = weekdays(D$time[tickmarks2])
+  if (lang == "fr") {
+    wkday = gsub(pattern = "Sunday", replacement = "dimanche", x = wkday)
+    wkday = gsub(pattern = "Saturday", replacement = "samedi", x = wkday)
+    wkday = gsub(pattern = "Friday", replacement = "vendredi", x = wkday)
+    wkday = gsub(pattern = "Thursday", replacement = "jeudi", x = wkday)
+    wkday = gsub(pattern = "Wednesday", replacement = "mercredi", x = wkday)
+    wkday = gsub(pattern = "Tuesday", replacement = "mardi", x = wkday)
+    wkday = gsub(pattern = "Monday", replacement = "lundi", x = wkday)
+  }
+  wkday = substr(wkday, start = 1, stop = 3)
   
   dayborders = which(D$clocktime == "00:00")
   dayborders2 = which(format(Mshort$timestamp,"%H:%M") == "00:00")
@@ -199,7 +225,7 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
   load(fn2)
   cosinor_ts = SUM$cosinor_ts
   
-  # attempt to allign cosinor timeseries
+  # attempt to align cosinor timeseries
   cosvars = SUM$summary[grep(pattern = "cosinor", x = names(SUM$summary), value = TRUE)]
   minute_0 = as.numeric(format(Mshort$timestamp[1], "%H")) * 60 + as.numeric(format(Mshort$timestamp[1], "%M"))
   minute_1 = minute_0 + floor((nrow(Mshort) * reso) / 60)
@@ -224,7 +250,7 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
     cosinor_ts2 = merge(tmpdf, cosinor_ts2, by = "time_epoch", all.x = TRUE)
   }
   cosinor_ts2$timestamp = Mshort$timestamp[1] + cosinor_ts2$time_epoch
-  Mshort = merge(Mshort, cosinor_ts2, by = "timestamp")
+  Mshort = merge(Mshort, cosinor_ts2, by = "timestamp", all.x = TRUE)
   
   LWD = 1.5
   
@@ -235,20 +261,11 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
         col = "black", lty = 1, lwd = LWD)
   lines(Mshort$timestamp, Mshort$fittedYext, type = "l",
         col = "black", lty = 3, lwd = LWD)
-  
-  axis(side = 1, line = 1, at = as.numeric(timeat),
-       labels = rep("", length(timeval)), tck = -0.2)
-  axis(side = 1, line = 1, at = as.numeric(timeat2),
-       labels = rep("", length(timeval2)), tck = -0.1)
-  axis(side = 1, line = 2, at = as.numeric(timeat2),
-       labels = paste0(labels[11, lang], timeval2), col = NA,
-       col.ticks = NA, cex.axis = 1.1)
-  # axis(4)
+  axis(side = 1, line = 0, at = as.numeric(timeat2), labels = wkday,
+       col = NA, col.ticks = NA, cex.axis = 1.5)
   abline(v = D$timenum[dayborders], lty = 2, col = "grey")
   mtext(labels[12, lang], padj = 0, side = 2, line = 1, las = 1, 
         cex = lab_cex_left, col = "black", outer = FALSE, font = 2)
   mtext(labels[13, lang],
         side = 4, line = 1, las = 1, cex = lab_cex_right, col = "black", outer = FALSE)
-  
-
 }

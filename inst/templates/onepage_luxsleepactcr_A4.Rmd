@@ -41,10 +41,11 @@ writeReportTable(data, id)
 
 ```
 
-```{r, echo = FALSE, fig.fullwidth=TRUE, fig.align = "left"}
+```{r, echo = FALSE, fig.fullwidth=TRUE, fig.align = "center"}
+
 # Create png file with plot
 png(filename = plotfile,
-      width = 8, height = 4.5, res = 300, units = "in")
+      width = 7.5, height = 4, res = 300, units = "in")
 plot_lux_sleep_act_cr(GGIRoutputdir = GGIRoutputdir, id = id, lang = lang, desiredtz = desiredtz)
 invisible(dev.off())
 
