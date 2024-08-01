@@ -23,6 +23,11 @@ lang = "fr"
 # kkkk
 # Run code as called from within Markdown
 creatReport(GGIRoutputdir = GGIRoutputdir,
-            lang = lang, idsep = "_", desiredtz = "Europe/London", type = "onepage_luxsleepactcr_A4")
+            lang = lang, idsep = "_", desiredtz = "Europe/London", type = "onepage_luxsleepactcr_A4",
+            deviceName = "GENEActiv")
 
+
+
+col = rainbow(n = 200)
+plot(1:200, rep(1, 200), col = col, pch = 20, type = "p", cex= 10)
 

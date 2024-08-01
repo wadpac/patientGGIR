@@ -5,10 +5,12 @@
 #' @param idsep Character, to split filename and use first segment as participant id
 #' @param desiredtz Character, timezone from timezone data base names, see also GGIR documentation.
 #' @param type Character to specify type of report, current options: onepage_luxsleepactcr_A4
+#' @param deviceName Character to be used as device name, if not specified then we call it movement sensor
 #' @return no object is returned, a pdf is saves is save in the GGIr output directory
 #' @export
 #' 
-creatReport = function(GGIRoutputdir = NULL, lang = "fr", idsep = "_", desiredtz = "", type = NULL) {
+creatReport = function(GGIRoutputdir = NULL, lang = "fr", idsep = "_", desiredtz = "", type = NULL,
+                       deviceName = NULL) {
   
   # Check input  
   if (!is.null(type)) {
@@ -33,11 +35,13 @@ creatReport = function(GGIRoutputdir = NULL, lang = "fr", idsep = "_", desiredtz
     return(unlist(strsplit(x, idsep))[1])
   }
   ids = unlist(lapply(dir(paste0(GGIRoutputdir, "/meta/basic"), full.names = FALSE), FUN = getID))
-
+  
   if (lang == "fr") {
-    docTitle = "Mesures de la montre capteur de mouvement"
+    if (is.null(deviceName)) deviceName = "capteur de mouvement"
+    docTitle = paste0("Mesures de la montre ", deviceName)
   } else if (lang == "en") {
-    docTitle = "Motion sensor watch measurements"
+    if (is.null(deviceName)) deviceName = "Motion sensor watch"
+    docTitle = paste0(deviceName, " measurements")
   }
   # Generate repots
   for (id in ids) {

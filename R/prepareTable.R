@@ -78,7 +78,6 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   names(P4N)[grep(pattern = "SleepDurationInSpt", x = names(P4N))] = labels[8, lang]
   names(P4N)[grep(pattern = "ratio", x = names(P4N))] = labels[9, lang]
   P4N = P4N[order(P4N$calendar_date), ]
-
   
   # Physical activity
   modvar = grep(pattern = "total_MOD", x = names(P5D))
@@ -96,7 +95,7 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   names(P5D)[ligvar] = labels[11, lang]
   names(P5D)[invar] = labels[12, lang]
   P5D = P5D[order(P5D$calendar_date), ]
-
+  
   # M5 timing
   M5HR = floor(P2D$M5hr_ENMO_mg_0.24hr)
   M5MIN = floor((P2D$M5hr_ENMO_mg_0.24hr - M5HR) * 60)
@@ -108,8 +107,24 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   daydata = merge(P4N, P5D, by = c( "calendar_date","weekday")) #
   daydata = merge(daydata, P2D, by = c("calendar_date", "weekday")) #,
   daydata = daydata[order(daydata$calendar_date), ]
-  daydata = daydata[, grep(pattern = "calendar", x = colnames(daydata), invert = TRUE)]
+  # Add missing days as empty columns
   
+  # Dummy data for testing
+  # daydata = data.frame(calendar_date = as.Date(c("2024-06-03", "2024-06-04", "2024-06-06", "2024-06-07")),
+  #                      value = 1:4)
+  dRange = range(daydata$calendar_date)
+  expectedDate = dRange[1]:dRange[2]
+  missingDates = as.Date(expectedDate[which(expectedDate %in% daydata$calendar_date == FALSE)])
+  if (length(missingDates) > 0) {
+    tmp_daydata = data.frame(calendar_date = missingDates)
+    daydata = merge(tmp_daydata, daydata, by = "calendar_date", all.x = TRUE)
+    daydata$weekday = weekdays(daydata$calendar_date)
+    isna = is.na(daydata)
+    if (any(isna)) {
+      daydata[isna] = "-"
+    }
+  }
+  daydata = daydata[, grep(pattern = "calendar", x = colnames(daydata), invert = TRUE)]
   if (lang != "en") {
     # Translate
     weekday_English = c("Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday")

@@ -9,7 +9,8 @@ creatReport(
   lang = "fr",
   idsep = "_",
   desiredtz = "",
-  type = NULL
+  type = NULL,
+  deviceName = NULL
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ creatReport(
 \item{desiredtz}{Character, timezone from timezone data base names, see also GGIR documentation.}
 
 \item{type}{Character to specify type of report, current options: onepage_luxsleepactcr_A4}
+
+\item{deviceName}{Character to be used as device name, if not specified then we call it movement sensor}
 }
 \value{
 no object is returned, a pdf is saves is save in the GGIr output directory

@@ -139,7 +139,7 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
     wkday = gsub(pattern = "Tuesday", replacement = "mardi", x = wkday)
     wkday = gsub(pattern = "Monday", replacement = "lundi", x = wkday)
   }
-  wkday = substr(wkday, start = 1, stop = 3)
+  # wkday = substr(wkday, start = 1, stop = 3)
   
   dayborders = which(D$clocktime == "00:00")
   dayborders2 = which(format(Mshort$timestamp,"%H:%M") == "00:00")
@@ -262,7 +262,7 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
   lines(Mshort$timestamp, Mshort$fittedYext, type = "l",
         col = "black", lty = 3, lwd = LWD)
   axis(side = 1, line = 0, at = as.numeric(timeat2), labels = wkday,
-       col = NA, col.ticks = NA, cex.axis = 1.5)
+       col = NA, col.ticks = NA, cex.axis = 1.1)
   abline(v = D$timenum[dayborders], lty = 2, col = "grey")
   mtext(labels[12, lang], padj = 0, side = 2, line = 1, las = 1, 
         cex = lab_cex_left, col = "black", outer = FALSE, font = 2)
