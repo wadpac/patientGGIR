@@ -53,7 +53,8 @@ creatReport = function(GGIRoutputdir = NULL, lang = "fr", idsep = "_", desiredtz
       output_format = "pdf_document",
       output_file = paste0(id ,"_report.pdf"),
       output_dir = GGIRoutputdir,
-      params = list(GGIRoutputdir = GGIRoutputdir, id = id, plotfile = plotfile, lang = lang, desiredtz = desiredtz, docTitle = docTitle))
+      params = list(GGIRoutputdir = GGIRoutputdir, id = id, plotfile = plotfile, lang = lang, desiredtz = desiredtz, docTitle = docTitle,
+                    deviceName = deviceName))
     if (file.exists(plotfile)) file.remove(plotfile)
   }
 }

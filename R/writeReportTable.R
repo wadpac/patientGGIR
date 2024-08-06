@@ -13,7 +13,7 @@ writeReportTable = function(data, id) {
     kableExtra::kable_styling(latex_options = c("striped", "hold_position"), full_width = FALSE) %>%
     footnote(general = paste0("ID: ", id),
              footnote_as_chunk = TRUE) |>
-    column_spec(1, width = "5cm") |>
+    column_spec(1, width = "4cm") |>
     row_spec(0, bold = TRUE) |>
     row_spec(1, bold = TRUE) |>
     row_spec(7, bold = TRUE) |>

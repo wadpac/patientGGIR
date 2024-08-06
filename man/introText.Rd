@@ -4,7 +4,7 @@
 \alias{introText}
 \title{introText}
 \usage{
-introText(GGIRoutputdir = NULL, id = NULL, lang = "fr")
+introText(GGIRoutputdir = NULL, id = NULL, lang = "fr", deviceName = NULL)
 }
 \arguments{
 \item{GGIRoutputdir}{Path to GGIR output folder, e.g. C:/output_mystudy}
@@ -12,6 +12,8 @@ introText(GGIRoutputdir = NULL, id = NULL, lang = "fr")
 \item{id}{Character, the id of the recording}
 
 \item{lang}{Character, language to use fr=french, en=english}
+
+\item{deviceName}{Character with the device name to be mention in report, which defaults to movement sensor watch in the chosen language if not specified}
 }
 \value{
 no object is returned, text is printed with cat

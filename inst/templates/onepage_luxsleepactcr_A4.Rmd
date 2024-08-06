@@ -22,6 +22,7 @@ header-includes:
 ---
 
 \vspace{-10truemm}
+\pagenumbering{gobble}
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -29,7 +30,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r, echo = FALSE, results="asis"}
-  introText(GGIRoutputdir, id, lang)
+  introText(GGIRoutputdir, id, lang, deviceName)
 ```
 
 
@@ -45,7 +46,7 @@ writeReportTable(data, id)
 
 # Create png file with plot
 png(filename = plotfile,
-      width = 7.5, height = 4, res = 300, units = "in")
+      width = 8, height = 4, res = 300, units = "in")
 plot_lux_sleep_act_cr(GGIRoutputdir = GGIRoutputdir, id = id, lang = lang, desiredtz = desiredtz)
 invisible(dev.off())
 

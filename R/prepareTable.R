@@ -8,6 +8,9 @@
 #' 
 prepareTable = function(GGIRoutputdir, id, lang) {
   # labels in multiple languages
+  # \u00E0 = à # a with line to the left
+  # \u00E9 = é # e with line to the right
+  # \u00E8 = è # e with line to the left
   labels = matrix("", 12, 2)
   labels[1, ] = c("Heure de l'endormissement", "Sleep time") #00E0 is à
   labels[2, ] = c("Heure du r\u00E9veil", "Wake up time")
@@ -15,14 +18,14 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   labels[4, ] = c("D\u00E9but de la p\u00E9riode de 5 heures la plus active", "Start of the most active 5 hour period")
   labels[5, ] = c("Sommeil noturne:", "Nighttime sleep:")
   labels[6, ] = c("Activit\u00E9 en journ\u00E9e:", "Daytime activity:")
-  labels[7, ] = c("Nombre d'heures pass\u00E9es au lit", "Number of hours spent in bed")
-  labels[8, ] = c("Nombre d'heures pass\u00E9es \u00E0 dormir", "Number of hours spent sleeping")
+  labels[7, ] = c("Temps pass\u00E9 au lit", "Time spent in bed")
+  labels[8, ] = c("Temps pass\u00E9 \u00E0 dormir", "Time spent sleeping")
   labels[9, ] = c("Proportion de temps dormi par rapport au temps pass\u00E9 au lit",
                   "Proportion of time slept compared to time spent in bed")
-  labels[10, ] = c("Nombre d'heures d'activit\u00E9 mod\u00E9r\u00E9e",
-                   "Number of hours of moderate activity")
-  labels[11, ] = c("Nombre d'heures d'activit\u00E9 l\u00E9g\u00E8re",
-                   "Number of hours of light activity")
+  labels[10, ] = c("Temps d'activit\u00E9 physique",
+                   "Time spent in moderate or vigorous activity")
+  labels[11, ] = c("Temps d'activit\u00E9 l\u00E9g\u00E8re",
+                   "Time spent in light activity")
   labels[12, ] = c("Temps inactif ou de repos", "Inactive or rest time")
   
   labels = as.data.frame(x = labels)
@@ -41,7 +44,8 @@ prepareTable = function(GGIRoutputdir, id, lang) {
                                               "SleepDurationInSpt", "weekday", "calendar_date")]
   
   P5D = read.csv(file = paste0(GGIRoutputdir, "/results/part5_daysummary_WW_L40M100V400_T5A5.csv"))
-  P5D = P5D[grep(pattern = id, x = P5D$ID), c("dur_day_total_MOD_min",
+  P5D = P5D[grep(pattern = id, x = P5D$ID), c("dur_day_total_VIG_min",
+                                              "dur_day_total_MOD_min",
                                               "dur_day_total_LIG_min",
                                               "dur_day_total_IN_min",
                                               "weekday", "calendar_date")]
@@ -80,9 +84,11 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   P4N = P4N[order(P4N$calendar_date), ]
   
   # Physical activity
+  vigvar = grep(pattern = "total_VIG", x = names(P5D))
   modvar = grep(pattern = "total_MOD", x = names(P5D))
   ligvar = grep(pattern = "total_LIG", x = names(P5D))
   invar = grep(pattern = "total_IN", x = names(P5D))
+  P5D[, modvar] = P5D[, modvar] + P5D[, vigvar]
   summaryColumn[7] = readableHours(mean(P5D[, modvar], rm.na = TRUE) / 60)
   summaryColumn[8] = readableHours(mean(P5D[, ligvar], rm.na = TRUE) / 60)
   summaryColumn[9] = readableHours(mean(P5D[, invar], rm.na = TRUE) / 60)
@@ -95,7 +101,7 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   names(P5D)[ligvar] = labels[11, lang]
   names(P5D)[invar] = labels[12, lang]
   P5D = P5D[order(P5D$calendar_date), ]
-  
+  P5D = P5D[, -vigvar]  
   # M5 timing
   M5HR = floor(P2D$M5hr_ENMO_mg_0.24hr)
   M5MIN = floor((P2D$M5hr_ENMO_mg_0.24hr - M5HR) * 60)
@@ -129,7 +135,7 @@ prepareTable = function(GGIRoutputdir, id, lang) {
     # Translate
     weekday_English = c("Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
     if (lang == "fr") {
-      weekday_NewLang = c("samedi", "dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi")
+      weekday_NewLang = c("Samedi", "Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi")
     }
     for (i in 1:7) {
       daydata$weekday = gsub(pattern = weekday_English[i], replacement = weekday_NewLang[i], x = daydata$weekday)

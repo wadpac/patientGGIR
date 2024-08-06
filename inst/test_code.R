@@ -6,7 +6,7 @@ library(patientGGIR)
 
 GGIRoutputdir = "D:/Dropbox/Work/sharedfolder/projects/ERC_Paris/Clinic/output_pilot2022"
 lang = "fr"
-# # Run code in isolation
+# # Run plot code in isolation
 # source("R/plot_lux_sleep_act_cr.R")
 # getID = function(x) {
 #   x = gsub(pattern = "meta_", replacement = "", x = x)
@@ -20,6 +20,19 @@ lang = "fr"
 #                       lang = lang, desiredtz = "Europe/London")
 # 
 # 
+
+
+# # Run prepare table code in isolation
+# source("R/prepareTable.R")
+# getID = function(x) {
+#   x = gsub(pattern = "meta_", replacement = "", x = x)
+#   return(unlist(strsplit(x, "_"))[1])
+# }
+# ids = unlist(lapply(dir(paste0(GGIRoutputdir, "/meta/basic"), full.names = FALSE), FUN = getID))
+# 
+# data = prepareTable(GGIRoutputdir, id = ids[1], lang)
+
+
 # kkkk
 # Run code as called from within Markdown
 creatReport(GGIRoutputdir = GGIRoutputdir,
@@ -28,6 +41,6 @@ creatReport(GGIRoutputdir = GGIRoutputdir,
 
 
 
-col = rainbow(n = 200)
-plot(1:200, rep(1, 200), col = col, pch = 20, type = "p", cex= 10)
+# col = rainbow(n = 200)
+# plot(1:200, rep(1, 200), col = col, pch = 20, type = "p", cex= 10)
 

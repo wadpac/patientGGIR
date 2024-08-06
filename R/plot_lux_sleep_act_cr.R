@@ -24,14 +24,15 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
   labels[4, ] = c("Sommeil", "Sleep")
   labels[5, ] = c("journ\u00E9e", "day") #00E9 is é / 00E8 is è 
   labels[6, ] = c("nocturne", "night")
-  labels[7, ] = c("Activit\u00E9e\nmesur\u00E9ee par\nl'acc\u00E9el\u00E9eration", "Activity\nmeasured by\nacceleration")
-  labels[8, ] = c("Acc\u00E9el\u00E9eration faible", "Low acceleration")
-  labels[9, ] = c("Acc\u00E9el\u00E9eration \u00E9elev\u00E9ee", "High acceleration")
+  labels[7, ] = c("Activit\u00E9\nmesur\u00E9e par\nl'acc\u00E9l\u00E9ration", 
+                  "Activity\nmeasured by\nacceleration")
+  labels[8, ] = c("Acc\u00E9l\u00E9ration faible", "Low acceleration")
+  labels[9, ] = c("Acc\u00E9l\u00E9ration \u00E9lev\u00E9e", "High acceleration")
   labels[10, ] = c("Rythme circadien", "Circadian Rhythm")
   labels[11, ] = c("Jour ", "Day ")
   labels[12, ] = c("Rythme\ncircadien", "Circadian\nrhythm")
-  labels[13, ] = c(paste0("Amplitude du rythme\ncircadien estim\u00E9ee\n\u00E0 partir",
-                          " des donn\u00E9ees\nd'acc\u00E9el\u00E9eration (en vert)"),
+  labels[13, ] = c(paste0("Amplitude du rythme\ncircadien estim\u00E9e\n\u00E0 partir",
+                          " des donn\u00E9es\nd'acc\u00E9l\u00E9ration (en vert)"),
                    paste0("Amplitude of the\ncircadian rhythm\nestimated ",
                           "from the\naccelero meter data\n(in green)"))
   labels = as.data.frame(x = labels)
@@ -259,8 +260,8 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
        lwd = 0.8, col = "lightgreen", ylim = c(0, log((500) + 1)))
   lines(Mshort$timestamp, Mshort$fittedY, type = "l",
         col = "black", lty = 1, lwd = LWD)
-  lines(Mshort$timestamp, Mshort$fittedYext, type = "l",
-        col = "black", lty = 3, lwd = LWD)
+  # lines(Mshort$timestamp, Mshort$fittedYext, type = "l",
+  #       col = "black", lty = 3, lwd = LWD)
   axis(side = 1, line = 0, at = as.numeric(timeat2), labels = wkday,
        col = NA, col.ticks = NA, cex.axis = 1.1)
   abline(v = D$timenum[dayborders], lty = 2, col = "grey")
