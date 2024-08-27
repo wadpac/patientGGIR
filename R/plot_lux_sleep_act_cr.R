@@ -51,12 +51,12 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
   dates_in_table = as.Date(P5D[grep(pattern = id, x = P5D$ID), "calendar_date"])
   
   if (length(grep(pattern = "[.]RData", x = P5ts[grep(id, P5ts)])) > 0) {
-    load(file = P5ts[grep(id, P5ts)])
+    load(file = P5ts[grep(id, basename(P5ts))])
     D = mdat
   } else {
-    D = read.csv(file = P5ts[grep(id, P5ts)])
+    D = read.csv(file = P5ts[grep(id, basename(P5ts))])
   }
-  load(file = P1[grep(id,P1)])
+  load(file = P1[grep(id,basename(P1))])
   # aggregate D
   D$timenum = floor(D$timenum / reso) * reso
   D$sib = 0
