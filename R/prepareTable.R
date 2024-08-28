@@ -88,7 +88,7 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   modvar = grep(pattern = "total_MOD", x = names(P5D))
   ligvar = grep(pattern = "total_LIG", x = names(P5D))
   invar = grep(pattern = "total_IN", x = names(P5D))
-  P5D[, modvar] = P5D[, modvar] + P5D[, vigvar]
+  P5D[, modvar] = P5D[, modvar] + P5D[, vigvar] # MVPA
   summaryColumn[7] = readableHours(mean(P5D[, modvar], rm.na = TRUE) / 60)
   summaryColumn[8] = readableHours(mean(P5D[, ligvar], rm.na = TRUE) / 60)
   summaryColumn[9] = readableHours(mean(P5D[, invar], rm.na = TRUE) / 60)
