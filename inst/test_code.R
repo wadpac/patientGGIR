@@ -9,10 +9,10 @@ source("R/plot_lux_sleep_act_cr.R")
 source("R/prepareTable.R")
 source("R/introText.R")
 source("R/writeReportTable.R")
-# GGIRoutputdir = "D:/Dropbox/Work/sharedfolder/projects/ERC_Paris/Clinic/output_pilot2022"
-# idsep = "_"
-GGIRoutputdir = "D:/Dropbox/Work/sharedfolder/projects/ERC_Paris/Clinic/Circame_2024_bin/output_S20_2024_copie"
-idsep = "[.]"
+GGIRoutputdir = "D:/Dropbox/Work/sharedfolder/projects/ERC_Paris/Clinic/output_pilot2022"
+idsep = "_"
+# GGIRoutputdir = "D:/Dropbox/Work/sharedfolder/projects/ERC_Paris/Clinic/Circame_2024_bin/output_S20_2024_copie"
+# idsep = "[.]"
 lang = "fr"
 
 # # # Run plot code in isolation
@@ -25,7 +25,7 @@ lang = "fr"
 # 
 # 
 # x11()
-# plot_lux_sleep_act_cr(GGIRoutputdir = GGIRoutputdir, id = ids[6],
+# plot_lux_sleep_act_cr(GGIRoutputdir = GGIRoutputdir, id = ids[5],
 #                       lang = lang, desiredtz = "Europe/London")
 # kkkk
 
@@ -40,8 +40,8 @@ lang = "fr"
 # }
 # ids = unlist(lapply(dir(paste0(GGIRoutputdir, "/meta/basic"), full.names = FALSE), FUN = getID))
 # 
-# data = prepareTable(GGIRoutputdir, id = ids[6], lang)
-# 
+# data = prepareTable(GGIRoutputdir, id = ids[1], lang)
+
 # 
 # kkkk
 # Run code as called from within Markdown
