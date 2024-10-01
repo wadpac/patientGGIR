@@ -10,8 +10,7 @@ Description: Creates patient reports from output generated with R package GGIR <
 URL: https://github.com/wadpac/patientGGIR/
 BugReports: https://github.com/wadpac/patientGGIR/issues
 License: Apache License (== 2.0)
-Suggests: knitr, rmarkdown, tinytex
-Imports: kableExtra, extrafont
+Imports: kableExtra, extrafont, knitr, rmarkdown, tinytex
 Depends: utils, R (>= 3.5.0)
 Encoding: UTF-8
 RoxygenNote: 7.3.2
