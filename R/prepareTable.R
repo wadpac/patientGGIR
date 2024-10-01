@@ -37,12 +37,13 @@ prepareTable = function(GGIRoutputdir, id, lang) {
                                               "weekday", "calendar_date")]
   P2D = P2D[!is.na(P2D$M5hr_ENMO_mg_0.24hr),]
   
-  P4N = read.csv(file = paste0(GGIRoutputdir, "/results/part4_nightsummary_sleep_cleaned.csv"))
+  P4N = read.csv(file = paste0(GGIRoutputdir, "/results/QC/part4_nightsummary_sleep_full.csv"))
   P4N = P4N[grep(pattern = id, x = P4N$ID), c("sleeponset_ts",
                                               "wakeup_ts",
                                               "SptDuration",
-                                              "SleepDurationInSpt", "weekday", "calendar_date")]
+                                              "SleepDurationInSpt", "weekday", "calendar_date", "cleaningcode")]
   
+  NP4 = nrow(P4N)
   P5D = read.csv(file = paste0(GGIRoutputdir, "/results/part5_daysummary_WW_L40M100V400_T5A5.csv"))
   P5D = P5D[grep(pattern = id, x = P5D$ID), c("dur_day_total_VIG_min",
                                               "dur_day_total_MOD_min",
@@ -56,19 +57,20 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   shortenTime = function(time) {
     return(paste0(unlist(strsplit(time, ":"))[1:2], collapse = ":"))
   }
-  P4N$sleeponset_ts = unlist(lapply(X = P4N$sleeponset_ts, FUN = shortenTime))
-  P4N$wakeup_ts = unlist(lapply(X = P4N$wakeup_ts, FUN = shortenTime))
-  P4N$calendar_date = as.Date(P4N$calendar_date, format = "%d/%m/%Y")
-  names(P4N)[grep(pattern = "sleeponset_ts", x = names(P4N))] = labels[1, lang] #Bed time / Onset?
-  names(P4N)[grep(pattern = "wakeup_ts", x = names(P4N))] = labels[2, lang] #Wake up
-  P4N$ratio = paste0(round((P4N$SleepDurationInSpt / P4N$SptDuration) * 100), "%")
-  
   readableHours = function(hours) {
     HR = floor(hours)
     MINS = floor((hours - HR) * 60)
     MINS = paste0(ifelse(MINS < 10, yes = "0", no = ""), MINS)
     return(paste0(HR, "h", MINS, "min"))
   }
+  
+  P4N$sleeponset_ts = unlist(lapply(X = P4N$sleeponset_ts, FUN = shortenTime))
+  P4N$wakeup_ts = unlist(lapply(X = P4N$wakeup_ts, FUN = shortenTime))
+  P4N$calendar_date = as.Date(P4N$calendar_date, format = "%d/%m/%Y")
+  
+  names(P4N)[grep(pattern = "sleeponset_ts", x = names(P4N))] = labels[1, lang] #Bed time / Onset?
+  names(P4N)[grep(pattern = "wakeup_ts", x = names(P4N))] = labels[2, lang] #Wake up
+  P4N$ratio = paste0(round((P4N$SleepDurationInSpt / P4N$SptDuration) * 100), "%")
   summaryColumn[1] = labels[3, lang] #sur les 7 jours
   summaryColumn[4] = readableHours(mean(P4N$SptDuration, rm.na = TRUE))
   summaryColumn[5] = readableHours(mean(P4N$SleepDurationInSpt, rm.na = TRUE))
@@ -82,6 +84,11 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   names(P4N)[grep(pattern = "SleepDurationInSpt", x = names(P4N))] = labels[8, lang]
   names(P4N)[grep(pattern = "ratio", x = names(P4N))] = labels[9, lang]
   P4N = P4N[order(P4N$calendar_date), ]
+  missingNights = which(P4N$cleaningcode > 0)
+  if (length(missingNights) > 0) {
+    P4N[missingNights, grep(pattern = "calendar|weekday", x = colnames(P4N), invert = TRUE)] = "-"
+  }
+  P4N = P4N[, grep(pattern = "cleaningcode", x = colnames(P4N), invert = TRUE)]
   
   # Physical activity
   vigvar = grep(pattern = "total_VIG", x = names(P5D))
