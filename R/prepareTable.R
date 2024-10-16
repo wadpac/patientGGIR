@@ -51,7 +51,6 @@ prepareTable = function(GGIRoutputdir, id, lang) {
                                               "dur_day_total_IN_min",
                                               "weekday", "calendar_date")]
   summaryColumn = rep("", 10)
-  
   P5D$calendar_date = as.Date(P5D$calendar_date, format = "%Y-%m-%d")
   # Sleep
   shortenTime = function(time) {
@@ -66,7 +65,7 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   
   P4N$sleeponset_ts = unlist(lapply(X = P4N$sleeponset_ts, FUN = shortenTime))
   P4N$wakeup_ts = unlist(lapply(X = P4N$wakeup_ts, FUN = shortenTime))
-  P4N$calendar_date = as.Date(P4N$calendar_date, format = "%d/%m/%Y")
+  P4N$calendar_date = as.Date(P4N$calendar_date, format = "%Y-%m-%d")
   
   names(P4N)[grep(pattern = "sleeponset_ts", x = names(P4N))] = labels[1, lang] #Bed time / Onset?
   names(P4N)[grep(pattern = "wakeup_ts", x = names(P4N))] = labels[2, lang] #Wake up
@@ -113,8 +112,7 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   M5HR = floor(P2D$M5hr_ENMO_mg_0.24hr)
   M5MIN = floor((P2D$M5hr_ENMO_mg_0.24hr - M5HR) * 60)
   P2D$M5hr_ENMO_mg_0.24hr = paste0(M5HR, ":", ifelse(M5MIN < 10, yes = "0", no = ""), M5MIN)
-  
-  P2D$calendar_date = as.Date(P2D$calendar_date, format = "%Y-%m-%dT")
+  P2D$calendar_date = as.Date(P2D$calendar_date, format = "%Y-%m-%d")
   names(P2D)[grep(pattern = "M5hr_ENMO_mg_0.24hr", x = names(P2D))] = labels[4, lang]
   
   daydata = merge(P4N, P5D, by = c( "calendar_date","weekday")) #
