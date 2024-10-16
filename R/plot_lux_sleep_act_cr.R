@@ -61,7 +61,7 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
   D$timenum = floor(D$timenum / reso) * reso
   D$sib = 0
   D$sib[which(D$class_id == 0)] = 1
-  D = aggregate(D[,c("ACC","window","sib","SleepPeriodTime")], by = list(D$timenum), FUN = mean)
+  D = aggregate(D[,c("ACC","window","sib","SleepPeriodTime", "invalidepoch")], by = list(D$timenum), FUN = mean)
   colnames(D)[1] = "timenum"
   D$time = as.POSIXlt(D$timenum, tz = desiredtz, origin = "1970-1-1")
   # Constrain time series to date range as found in cleaned part 5 report
@@ -119,7 +119,6 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
   colnames(Mshort)[1] = "timenum"
   Mshort$timestamp = as.POSIXct(Mshort$timenum, tz = desiredtz, origin = "1970-1-1")
   Mshort$sibs = round(Mshort$sibs)
-  
   minT = min(D$time)
   maxT = max(D$time)
   Mshort = Mshort[which(Mshort$timestamp >= minT & Mshort$timestamp <= maxT),]
@@ -152,7 +151,11 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
   Mshort$sib_day
   y0 = 90
   y1 = -90
-  
+  # Set all invalid epochs to NA
+  if (1 %in% D$invalidepoch) {
+    Mshort[which(D$invalidepoch == 1), grep(pattern = "time", x = colnames(Mshort))] = NA
+    LUXTEMP[which(LUXTEMP$nonwearscore >= 2), grep(pattern = "time", x = colnames(LUXTEMP))] = NA
+  }
   #==================================
   # plots
   lab_cex_left = 0.9
@@ -178,6 +181,7 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
         side = 4, line = 3, las = 1, cex = lab_cex_right, col = "black", outer = FALSE)
 
   #=== ROW (Sleep)
+  # Set all invalid epochs to NA
   plot(0:1, 0:1, type = "l", xlab = "", ylab = "", axes = F, 
        xlim = range(as.numeric(Mshort$timestamp[c(1, nrow(Mshort))])), 
        ylim = c(-90, 90), font.lab = 2, col = "white")
@@ -194,7 +198,10 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
     Nrect = min(length(x0),length(x1))
     if (Nrect > 0) {
       for (k in 1:Nrect) { # SIB during SPT
-        rect(x0[k],y0,x1[k],y1, col = col12, border = FALSE)
+        rect_invalid = D$invalidepoch[which(delta_sib == 1L)[k]:which(delta_sib == -1L)[k]]
+        if (length(which(rect_invalid == 1)) < length(which(rect_invalid == 0))) {
+          rect(x0[k],y0,x1[k],y1, col = col12, border = FALSE)
+        }
       }
     }
   }
@@ -252,13 +259,16 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
   }
   cosinor_ts2$timestamp = Mshort$timestamp[1] + cosinor_ts2$time_epoch
   Mshort = merge(Mshort, cosinor_ts2, by = "timestamp", all.x = TRUE)
-  
+  # Set all invalid epochs to NA
+  if (1 %in% D$invalidepoch) {
+    Mshort[which(D$invalidepoch == 1), grep(pattern = "time", x = colnames(Mshort))] = NA
+  }
   LWD = 1.5
   
-  plot(Mshort$timestamp, Mshort$original, type = "l",
+  plot(Mshort$timestamp, Mshort$original, type = "l", # pch = 20, cex = 0.2,
        ylab = labels[10, lang], xlab = "", axes = FALSE,
        lwd = 0.8, col = "lightgreen", ylim = c(0, log((500) + 1)))
-  lines(Mshort$timestamp, Mshort$fittedY, type = "l",
+  lines(Mshort$timestamp, Mshort$fittedY, type = "l", # pch = 20, cex = 0.2,
         col = "black", lty = 1, lwd = LWD)
   # lines(Mshort$timestamp, Mshort$fittedYext, type = "l",
   #       col = "black", lty = 3, lwd = LWD)

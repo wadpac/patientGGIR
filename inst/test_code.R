@@ -27,7 +27,7 @@ lang = "fr"
 # 
 # 
 # x11()
-# plot_lux_sleep_act_cr(GGIRoutputdir = GGIRoutputdir, id = ids[6],
+# plot_lux_sleep_act_cr(GGIRoutputdir = GGIRoutputdir, id = ids[5],
 #                       lang = lang, desiredtz = "Europe/London")
 
 # 
@@ -41,8 +41,7 @@ lang = "fr"
 # }
 # ids = unlist(lapply(dir(paste0(GGIRoutputdir, "/meta/basic"), full.names = FALSE), FUN = getID))
 # 
-# data = prepareTable(GGIRoutputdir, id = ids[6], lang)
-
+# data = prepareTable(GGIRoutputdir, id = ids[1], lang)
 
 # Run code as called from within Markdown
 creatReport(GGIRoutputdir = GGIRoutputdir,
