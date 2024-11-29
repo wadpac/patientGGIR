@@ -11,7 +11,7 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   # \u00E0 = à # a with line to the left
   # \u00E9 = é # e with line to the right
   # \u00E8 = è # e with line to the left
-  labels = matrix("", 12, 2)
+  labels = matrix("", 13, 2)
   labels[1, ] = c("Heure de l'endormissement", "Sleep time") #00E0 is à
   labels[2, ] = c("Heure du r\u00E9veil", "Wake up time")
   labels[3, ] = c("Moyenne", "Average")
@@ -27,6 +27,7 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   labels[11, ] = c("Temps d'activit\u00E9 l\u00E9g\u00E8re",
                    "Time spent in light activity")
   labels[12, ] = c("Temps inactif ou de repos", "Inactive or rest time")
+  labels[13, ] = c("Code d'imputation du journal", "Diary Imputation Code")
   
   labels = as.data.frame(x = labels)
   colnames(labels) = c("fr", "en")
@@ -50,7 +51,7 @@ prepareTable = function(GGIRoutputdir, id, lang) {
                                               "dur_day_total_LIG_min",
                                               "dur_day_total_IN_min",
                                               "weekday", "calendar_date")]
-  summaryColumn = rep("", 10)
+  summaryColumn = rep("", 11)
   P5D$calendar_date = as.Date(P5D$calendar_date, format = "%Y-%m-%d")
   # Sleep
   shortenTime = function(time) {
@@ -75,7 +76,19 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   summaryColumn[5] = readableHours(mean(P4N$SleepDurationInSpt, rm.na = TRUE))
   summaryColumn[6] = paste0(round(mean((P4N$SleepDurationInSpt / P4N$SptDuration) * 100,
                                        rm.na = TRUE)), "%")
-  
+  rowIndex = 7
+  # Add diary imputaton code, if present, as final row
+  load(paste0(GGIRoutputdir, "/meta/sleeplog.RData"))
+  impcode = which(logs_diaries$imputecodelog$ID == id)
+  diaryImputationCodeAvailable = FALSE
+  if (length(impcode) > 0) {
+    diaryImputationCodeAvailable = TRUE
+    logs_diaries$imputecodelog = logs_diaries$imputecodelog[impcode , ]
+    colnames(logs_diaries$imputecodelog) = c("id", "calendar_date", labels[13, lang])
+    P4N = merge(P4N, logs_diaries$imputecodelog, by = c("calendar_date"))
+    P4N = P4N[, which(colnames(P4N) != "id")]
+    summaryColumn[rowIndex] = ""
+  }
   P4N$SptDuration = unlist(lapply(X = P4N$SptDuration, FUN = readableHours))
   P4N$SleepDurationInSpt = unlist(lapply(X = P4N$SleepDurationInSpt, FUN = readableHours))
   
@@ -95,9 +108,9 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   ligvar = grep(pattern = "total_LIG", x = names(P5D))
   invar = grep(pattern = "total_IN", x = names(P5D))
   P5D[, modvar] = P5D[, modvar] + P5D[, vigvar] # MVPA
-  summaryColumn[7] = readableHours(mean(P5D[, modvar], rm.na = TRUE) / 60)
-  summaryColumn[8] = readableHours(mean(P5D[, ligvar], rm.na = TRUE) / 60)
-  summaryColumn[9] = readableHours(mean(P5D[, invar], rm.na = TRUE) / 60)
+  summaryColumn[rowIndex + 1] = readableHours(mean(P5D[, modvar], rm.na = TRUE) / 60)
+  summaryColumn[rowIndex + 2] = readableHours(mean(P5D[, ligvar], rm.na = TRUE) / 60)
+  summaryColumn[rowIndex + 3] = readableHours(mean(P5D[, invar], rm.na = TRUE) / 60)
   
   P5D[, modvar] = unlist(lapply(X = P5D[, modvar] / 60, FUN = readableHours))
   P5D[, ligvar] = unlist(lapply(X = P5D[, ligvar] / 60, FUN = readableHours))
@@ -148,14 +161,13 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   }
   
   daydata = cbind(t(daydata), summaryColumn)
+  endSleepSection = 7 #ifelse(diaryImputationCodeAvailable, 7, 6)
   daydata = rbind(daydata[1,],
                   rep("", ncol(daydata)),
-                  daydata[2:6,],
-                  rep("", ncol(daydata)),
-                  daydata[7:nrow(daydata),])
-  
-  row.names(daydata)[c(2, 8)] = labels[5:6, lang]
-  
+                  daydata[2:endSleepSection,],
+                  matrix("", ifelse(diaryImputationCodeAvailable == FALSE, 2, 1), ncol(daydata)),
+                  daydata[(endSleepSection + 1):nrow(daydata),])
+  row.names(daydata)[c(2, (endSleepSection + 2))] = labels[5:6, lang]
   row.names(daydata)[grep(pattern = "weekday", x = row.names(daydata))] = "Day of the week"
   colnames(daydata) = daydata[1,]
   daydata = daydata[-1,]

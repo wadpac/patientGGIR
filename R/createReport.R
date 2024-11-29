@@ -51,7 +51,7 @@ creatReport = function(GGIRoutputdir = NULL, lang = "fr", idsep = "_", desiredtz
     rmarkdown::render(
       input = type_template,
       output_format = "pdf_document",
-      output_file = paste0(id ,"_report.pdf"),
+      output_file = paste0(id , "_report_", lang,".pdf"),
       output_dir = GGIRoutputdir,
       params = list(GGIRoutputdir = GGIRoutputdir, id = id, plotfile = plotfile, lang = lang, desiredtz = desiredtz, docTitle = docTitle,
                     deviceName = deviceName))
