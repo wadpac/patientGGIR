@@ -3,10 +3,11 @@
 #' @param GGIRoutputdir Path to GGIR output folder, e.g. C:/output_mystudy
 #' @param id Character, the id of the recording
 #' @param lang Character, language to use fr=french, en=english
+#' @param maskingFile Character to point to csv file with dates to be masked per ID
 #' @return no object is returned, text is printed with cat
 #' @export
 #' 
-prepareTable = function(GGIRoutputdir, id, lang) {
+prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   # labels in multiple languages
   # \u00E0 = à # a with line to the left
   # \u00E9 = é # e with line to the right
@@ -32,6 +33,20 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   labels = as.data.frame(x = labels)
   colnames(labels) = c("fr", "en")
   
+  maskDates = NULL
+  if (!is.null(maskingFile)) {
+    mask = data.table::fread(file = maskingFile, data.table = FALSE)
+    if (id %in% mask$ID) {
+      mask = mask[which(mask$ID == id),]
+      if (length(grep("/", mask$date)) > 0) {
+        dsep = "/"
+      } else {
+        dsep = "-"
+      }
+      maskDates = as.Date(mask$date, paste0("%d", dsep, "%m", dsep, "%Y"))
+    }
+  }
+  
   # Load all GGIR results (always in English)
   P2D = read.csv(file = paste0(GGIRoutputdir, "/results/part2_daysummary.csv"))
   P2D = P2D[grep(pattern = id, x = P2D$ID), c("M5hr_ENMO_mg_0.24hr",
@@ -53,6 +68,7 @@ prepareTable = function(GGIRoutputdir, id, lang) {
                                               "weekday", "calendar_date")]
   summaryColumn = rep("", 11)
   P5D$calendar_date = as.Date(P5D$calendar_date, format = "%Y-%m-%d")
+ 
   # Sleep
   shortenTime = function(time) {
     return(paste0(unlist(strsplit(time, ":"))[1:2], collapse = ":"))
@@ -71,6 +87,18 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   names(P4N)[grep(pattern = "sleeponset_ts", x = names(P4N))] = labels[1, lang] #Bed time / Onset?
   names(P4N)[grep(pattern = "wakeup_ts", x = names(P4N))] = labels[2, lang] #Wake up
   P4N$ratio = paste0(round((P4N$SleepDurationInSpt / P4N$SptDuration) * 100), "%")
+  
+  # Mask dates from maskDates file
+  if (!is.null(maskDates)) {
+    rem = which(P5D$calendar_date %in% maskDates)
+    if (length(rem) > 0) {
+      P5D = P5D[-rem, ]
+    }
+    rem = which(P4N$calendar_date %in% maskDates)
+    if (length(rem) > 0) {
+      P4N = P4N[-rem, ]
+    }
+  }
   summaryColumn[1] = labels[3, lang] #sur les 7 jours
   summaryColumn[4] = readableHours(mean(P4N$SptDuration, rm.na = TRUE))
   summaryColumn[5] = readableHours(mean(P4N$SleepDurationInSpt, rm.na = TRUE))
@@ -136,7 +164,7 @@ prepareTable = function(GGIRoutputdir, id, lang) {
   # Dummy data for testing
   # daydata = data.frame(calendar_date = as.Date(c("2024-06-03", "2024-06-04", "2024-06-06", "2024-06-07")),
   #                      value = 1:4)
-  dRange = range(daydata$calendar_date)
+  dRange = range(sort(unique(c(daydata$calendar_date, maskDates))))
   expectedDate = dRange[1]:dRange[2]
   missingDates = as.Date(expectedDate[which(expectedDate %in% daydata$calendar_date == FALSE)])
   if (length(missingDates) > 0) {
@@ -148,6 +176,8 @@ prepareTable = function(GGIRoutputdir, id, lang) {
       daydata[isna] = "-"
     }
   }
+ 
+  
   daydata = daydata[, grep(pattern = "calendar", x = colnames(daydata), invert = TRUE)]
   if (lang != "en") {
     # Translate
@@ -160,7 +190,7 @@ prepareTable = function(GGIRoutputdir, id, lang) {
     }
   }
   imputeColumID = which(names(daydata) == labels[13, lang])
-  days_imputed = which(daydata[,imputeColumID] != "0000")
+  days_imputed = which(daydata[,imputeColumID] %in% c("0000", "-") == FALSE)
   if (length(days_imputed) > 0) {
     daydata$weekday[days_imputed] = paste0(daydata$weekday[days_imputed], "*")
   }

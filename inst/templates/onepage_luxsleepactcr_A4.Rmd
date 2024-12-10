@@ -35,7 +35,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r, echo = FALSE}
-data = prepareTable(GGIRoutputdir, id, lang) 
+data = prepareTable(GGIRoutputdir, id, lang, maskingFile) 
 
 # Write table to report
 writeReportTable(data, id, lang)
@@ -47,7 +47,8 @@ writeReportTable(data, id, lang)
 # Create png file with plot
 png(filename = plotfile,
       width = 8, height = 4, res = 300, units = "in")
-plot_lux_sleep_act_cr(GGIRoutputdir = GGIRoutputdir, id = id, lang = lang, desiredtz = desiredtz)
+plot_lux_sleep_act_cr(GGIRoutputdir = GGIRoutputdir, id = id, lang = lang,
+                      desiredtz = desiredtz, maskingFile = maskingFile)
 invisible(dev.off())
 
 # Import plot 

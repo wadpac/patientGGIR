@@ -4,13 +4,15 @@
 #' @param id Character, participant id
 #' @param lang Character, language to use fr=french, en=english
 #' @param desiredtz Character, timezone from timezone data base names, see also GGIR documentation.
+#' @param maskingFile Character to point to csv file with dates to be masked per ID
 #' @return no object is returned, only a plot is generated
 #' @importFrom graphics abline axis layout legend lines mtext par rect
 #' @importFrom stats aggregate
 #' @importFrom utils read.csv
 #' @export
 
-plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "") {
+plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
+                                 maskingFile = NULL) {
   P5ts = dir(paste0(GGIRoutputdir, "/meta/ms5.outraw/40_100_400"), full.names = T)
   P1 = dir(paste0(GGIRoutputdir, "/meta/basic"), full.names = T)
   path = paste0(GGIRoutputdir, "/meta/ms2.out")
@@ -156,79 +158,8 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
     Mshort[which(D$invalidepoch == 1), grep(pattern = "time", x = colnames(Mshort))] = NA
     LUXTEMP[which(LUXTEMP$nonwearscore >= 2), grep(pattern = "time", x = colnames(LUXTEMP))] = NA
   }
-  #==================================
-  # plots
-  lab_cex_left = 0.9
-  lab_cex_right = 0.8
-  layout.matrix <- matrix(c(1, 2, 3, 4), nrow = 4, ncol = 1)
-  layout(mat = layout.matrix,
-         heights = c(1.5, 1.5, 1.5, 2), # Heights rows
-         widths = c(6)) # Widths columns
-  #----- LUX
-  par(mar = c(1, 4, 1, 9))
   
-  #=== ROW (Light)
-  par(mar = c(0.5, 0.5, 0.1, 9), family = "serif", cex.lab = 1.3, cex.axis = 1, las = 1)
-  plot(LUXTEMP$timestamp, LUXTEMP$lightpeak / 1000, type = "l",
-       xlab = "", ylab = "", cex.main = 2,  axes = F, ylim = c(0,  20),
-       font.lab = 2, lwd = 0.8, col = "gold2")
-  abline(v = Mshort$timenum[dayborders2], lty = 2, col = "grey")
-  abline(h = 1, lty = 2, col = "grey")
-  mtext(labels[1, lang], side = 2, line = 1, las = 1, 
-        cex = lab_cex_left, col = "black", outer = FALSE, font = 2)
-  axis(4)
-  mtext(text = c(labels[2, lang], labels[3, lang]), at = c(1, 19),
-        side = 4, line = 3, las = 1, cex = lab_cex_right, col = "black", outer = FALSE)
-
-  #=== ROW (Sleep)
-  # Set all invalid epochs to NA
-  plot(0:1, 0:1, type = "l", xlab = "", ylab = "", axes = F, 
-       xlim = range(as.numeric(Mshort$timestamp[c(1, nrow(Mshort))])), 
-       ylim = c(-90, 90), font.lab = 2, col = "white")
-  for (window in c("day", "night")) {
-    if (window == "day") {
-      delta_sib = diff(c(0L, Mshort$sib_day, 0L))
-      col12 = "purple"
-    } else if (window == "night") {
-      delta_sib = diff(c(0L, Mshort$sib_night, 0L))
-      col12 = "blue"
-    }
-    x0 = Mshort$timestamp[which(delta_sib == 1L)]
-    x1 = Mshort$timestamp[which(delta_sib == -1L)]
-    Nrect = min(length(x0),length(x1))
-    if (Nrect > 0) {
-      for (k in 1:Nrect) { # SIB during SPT
-        rect_invalid = D$invalidepoch[which(delta_sib == 1L)[k]:which(delta_sib == -1L)[k]]
-        if (length(which(rect_invalid == 1)) < length(which(rect_invalid == 0))) {
-          rect(x0[k],y0,x1[k],y1, col = col12, border = FALSE)
-        }
-      }
-    }
-  }
-  lines(Mshort$timestamp, Mshort$anglez, type = "l", lwd = 0.8)
-  abline(v = Mshort$timenum[dayborders2], lty = 2, col = "grey")
-  mtext(labels[4, lang], side = 2, line = 1, las = 1, cex = lab_cex_left, 
-        col = "black", outer = FALSE, font = 2)
-  legend("topright", legend = c(labels[5, lang], labels[6, lang]),
-         col = c("purple", "blue"),lty = c(1, 1), lwd = c(1.5, 1.5),
-         title = labels[4, lang], inset = c(-0.2, 0), xpd = TRUE, cex = 1.1)
-  
-  
-  #=== ROW (Acceleration)
-  plot(Mshort$timestamp, Mshort$ENMO * 1000, type = "l", xlab = "", ylab = "",
-       axes = F, ylim = c(0, 200), font.lab = 2, col = "red", lwd = 0.8)
-  mtext(labels[7, lang], adj = 1, side = 2, line = 1,
-        las = 1, cex = lab_cex_left, col = "black", outer = FALSE, font = 2)
-  axis(4)
-  abline(h = 100, lty = 2, col = "grey")
-  abline(v = Mshort$timenum[dayborders2], lty = 2, col = "grey")
-  mtext(text = c(labels[8, lang], labels[9, lang]),
-        at = c(10, 190),
-        side = 4, line = 3, las = 1, cex = lab_cex_right,
-        col = "black", outer = FALSE)
-  
-  #==== ROW (Circadian rhythm)
-  par(mar = c(4, 0.5, 0.1, 9))
+  # prepare Circam data
   fn2 = grep(pattern = as.character(id), x = fns, value =  TRUE)
   load(fn2)
   cosinor_ts = SUM$cosinor_ts
@@ -258,11 +189,110 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "")
     cosinor_ts2 = merge(tmpdf, cosinor_ts2, by = "time_epoch", all.x = TRUE)
   }
   cosinor_ts2$timestamp = Mshort$timestamp[1] + cosinor_ts2$time_epoch
+  cosinor_ts2 =  cosinor_ts2[, c("timestamp", "original", "fittedY")]
   Mshort = merge(Mshort, cosinor_ts2, by = "timestamp", all.x = TRUE)
   # Set all invalid epochs to NA
   if (1 %in% D$invalidepoch) {
     Mshort[which(D$invalidepoch == 1), grep(pattern = "time", x = colnames(Mshort))] = NA
   }
+  
+  
+  # Mask dates listed in the masking file
+  maskDates = NULL
+  if (!is.null(maskingFile)) {
+    mask = data.table::fread(file = maskingFile, data.table = FALSE)
+    if (id %in% mask$ID) {
+      mask = mask[which(mask$ID == id),]
+      if (length(grep("/", mask$date)) > 0) {
+        dsep = "/"
+      } else {
+        dsep = "-"
+      }
+      maskDates = as.Date(mask$date, paste0("%d", dsep, "%m", dsep, "%Y"))
+      tmp = which(as.Date(Mshort$timestamp) %in% maskDates)
+      if (tmp[1] == 1) tmp = tmp[-1] # prevent entire first day to be excluded
+      if (length(tmp) > 0)  {
+        Mshort[tmp, grep(pattern = "time", x = colnames(Mshort))] = NA
+      }
+      tmp = which(as.Date(LUXTEMP$timestamp) %in% maskDates)
+      if (tmp[1] == 1) tmp = tmp[-1] # prevent entire first day to be excluded
+      if (length(tmp) > 0)  {
+        LUXTEMP[tmp, grep(pattern = "time", x = colnames(LUXTEMP))] = NA
+      }
+    }
+  }
+  #==================================
+  # plots
+  lab_cex_left = 0.9
+  lab_cex_right = 0.8
+  layout.matrix <- matrix(c(1, 2, 3, 4), nrow = 4, ncol = 1)
+  layout(mat = layout.matrix,
+         heights = c(1.5, 1.5, 1.5, 2), # Heights rows
+         widths = c(6)) # Widths columns
+  #----- LUX
+  par(mar = c(1, 4, 1, 9))
+  
+  #=== ROW (Light)
+  par(mar = c(0.5, 0.5, 0.1, 9), family = "serif", cex.lab = 1.3, cex.axis = 1, las = 1)
+  plot(LUXTEMP$timestamp, LUXTEMP$lightpeak / 1000, type = "l",
+       xlab = "", ylab = "", cex.main = 2,  axes = F, ylim = c(0,  20),
+       font.lab = 2, lwd = 0.8, col = "gold2")
+  abline(v = Mshort$timenum[dayborders2], lty = 2, col = "grey")
+  abline(h = 1, lty = 2, col = "grey")
+  mtext(labels[1, lang], side = 2, line = 1, las = 1, 
+        cex = lab_cex_left, col = "black", outer = FALSE, font = 2)
+  axis(4)
+  mtext(text = c(labels[2, lang], labels[3, lang]), at = c(1, 19),
+        side = 4, line = 3, las = 1, cex = lab_cex_right, col = "black", outer = FALSE)
+
+  #=== ROW (Sleep)
+  # Set all invalid epochs to NA
+  plot(0:1, 0:1, type = "l", xlab = "", ylab = "", axes = F, 
+       xlim = range(as.numeric(Mshort$timestamp[range(which(is.na(Mshort$timestamp) == FALSE))])),
+       ylim = c(-90, 90), font.lab = 2, col = "white")
+  for (window in c("day", "night")) {
+    if (window == "day") {
+      delta_sib = diff(c(0L, Mshort$sib_day, 0L))
+      col12 = "purple"
+    } else if (window == "night") {
+      delta_sib = diff(c(0L, Mshort$sib_night, 0L))
+      col12 = "blue"
+    }
+    x0 = Mshort$timestamp[which(delta_sib == 1L)]
+    x1 = Mshort$timestamp[which(delta_sib == -1L)]
+    Nrect = min(length(x0),length(x1))
+    if (Nrect > 0) {
+      for (k in 1:Nrect) { # SIB during SPT
+        rect_invalid = D$invalidepoch[which(delta_sib == 1L)[k]:which(delta_sib == -1L)[k]]
+        if (length(which(rect_invalid == 1)) < length(which(rect_invalid == 0))) {
+          rect(x0[k],y0,x1[k],y1, col = col12, border = FALSE)
+        }
+      }
+    }
+  }
+  lines(Mshort$timestamp, Mshort$anglez, type = "l", lwd = 0.8)
+  abline(v = Mshort$timenum[dayborders2], lty = 2, col = "grey")
+  mtext(labels[4, lang], side = 2, line = 1, las = 1, cex = lab_cex_left, 
+        col = "black", outer = FALSE, font = 2)
+  legend("topright", legend = c(labels[5, lang], labels[6, lang]),
+         col = c("purple", "blue"),lty = c(1, 1), lwd = c(1.5, 1.5),
+         title = labels[4, lang], inset = c(-0.2, 0), xpd = TRUE, cex = 1.1)
+  
+  #=== ROW (Acceleration)
+  plot(Mshort$timestamp, Mshort$ENMO * 1000, type = "l", xlab = "", ylab = "",
+       axes = F, ylim = c(0, 200), font.lab = 2, col = "red", lwd = 0.8)
+  mtext(labels[7, lang], adj = 1, side = 2, line = 1,
+        las = 1, cex = lab_cex_left, col = "black", outer = FALSE, font = 2)
+  axis(4)
+  abline(h = 100, lty = 2, col = "grey")
+  abline(v = Mshort$timenum[dayborders2], lty = 2, col = "grey")
+  mtext(text = c(labels[8, lang], labels[9, lang]),
+        at = c(10, 190),
+        side = 4, line = 3, las = 1, cex = lab_cex_right,
+        col = "black", outer = FALSE)
+  
+  #==== ROW (Circadian rhythm)
+  par(mar = c(4, 0.5, 0.1, 9))
   LWD = 1.5
   
   plot(Mshort$timestamp, Mshort$original, type = "l", # pch = 20, cex = 0.2,

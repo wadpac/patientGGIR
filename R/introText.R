@@ -12,7 +12,9 @@ introText = function(GGIRoutputdir = NULL, id = NULL, lang = "fr", deviceName = 
   
   if (!is.null(GGIRoutputdir) && !is.null(id)) {
     P4N = read.csv(file = paste0(GGIRoutputdir, "/results/QC/part4_nightsummary_sleep_full.csv"))
-    date = min(P4N[grep(pattern = id, x = P4N$ID), "calendar_date"])
+    date = x = min(P4N[grep(pattern = id, x = P4N$ID), "calendar_date"])
+    date = as.Date(date, format = "%Y-%m-%d")
+    date = format(date, format = "%d-%m-%Y")
   }
   
   if (lang == "en") {

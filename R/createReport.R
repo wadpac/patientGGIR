@@ -6,11 +6,12 @@
 #' @param desiredtz Character, timezone from timezone data base names, see also GGIR documentation.
 #' @param type Character to specify type of report, current options: onepage_luxsleepactcr_A4
 #' @param deviceName Character to be used as device name, if not specified then we call it movement sensor
+#' @param maskingFile Character to point to csv file with dates to be masked per ID
 #' @return no object is returned, a pdf is saves is save in the GGIr output directory
 #' @export
 #' 
 creatReport = function(GGIRoutputdir = NULL, lang = "fr", idsep = "_", desiredtz = "", type = NULL,
-                       deviceName = NULL) {
+                       deviceName = NULL, maskingFile = NULL) {
   
   # Check input  
   if (!is.null(type)) {
@@ -54,7 +55,7 @@ creatReport = function(GGIRoutputdir = NULL, lang = "fr", idsep = "_", desiredtz
       output_file = paste0(id , "_report_", lang,".pdf"),
       output_dir = GGIRoutputdir,
       params = list(GGIRoutputdir = GGIRoutputdir, id = id, plotfile = plotfile, lang = lang, desiredtz = desiredtz, docTitle = docTitle,
-                    deviceName = deviceName))
+                    deviceName = deviceName, maskingFile = maskingFile))
     if (file.exists(plotfile)) file.remove(plotfile)
   }
 }

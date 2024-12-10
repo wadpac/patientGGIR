@@ -10,7 +10,8 @@ creatReport(
   idsep = "_",
   desiredtz = "",
   type = NULL,
-  deviceName = NULL
+  deviceName = NULL,
+  maskingFile = NULL
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ creatReport(
 \item{type}{Character to specify type of report, current options: onepage_luxsleepactcr_A4}
 
 \item{deviceName}{Character to be used as device name, if not specified then we call it movement sensor}
+
+\item{maskingFile}{Character to point to csv file with dates to be masked per ID}
 }
 \value{
 no object is returned, a pdf is saves is save in the GGIr output directory

@@ -2,6 +2,7 @@
 #'
 #' @param data Data.frame with data to be reported
 #' @param id Character, the id of the recording
+#' @param lang Character, language to use fr=french, en=english
 #' @return no object is returned, table is added to report.
 #' @import kableExtra
 #' @import extrafont

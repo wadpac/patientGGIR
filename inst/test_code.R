@@ -22,6 +22,7 @@ library(kableExtra)
 
 
 GGIRoutputdir = "D:/Dropbox/Work/sharedfolder/projects/ERC_Paris/Clinic/output_realCircameData"
+maskingFile = "D:/Dropbox/Work/sharedfolder/projects/ERC_Paris/Clinic/output_realCircameData/maskingFile.csv"
 idsep = "_"
 lang = "fr" #"fr"
 
@@ -35,9 +36,8 @@ lang = "fr" #"fr"
 # 
 # 
 # x11()
-# plot_lux_sleep_act_cr(GGIRoutputdir = GGIRoutputdir, id = ids[5],
-#                       lang = lang, desiredtz = "Europe/London")
-
+# plot_lux_sleep_act_cr(GGIRoutputdir = GGIRoutputdir, id = ids[9],
+#                       lang = lang, desiredtz = "Europe/London", maskingFile = maskingFile)
 # 
 # 
 # ================================================
@@ -49,11 +49,11 @@ lang = "fr" #"fr"
 # }
 # ids = unlist(lapply(dir(paste0(GGIRoutputdir, "/meta/basic"), full.names = FALSE), FUN = getID))
 # 
-# data = prepareTable(GGIRoutputdir, id = ids[1], lang)
+# data = prepareTable(GGIRoutputdir, id = ids[1], lang, maskingFile = maskingFile)
 
 # Run code as called from within Markdown
 creatReport(GGIRoutputdir = GGIRoutputdir,
             lang = lang, idsep = idsep, desiredtz = "Europe/Paris", type = "onepage_luxsleepactcr_A4",
-            deviceName = "GENEActiv")
+            deviceName = "GENEActiv", maskingFile = maskingFile)
 
 

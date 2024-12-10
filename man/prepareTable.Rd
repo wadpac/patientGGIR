@@ -4,7 +4,7 @@
 \alias{prepareTable}
 \title{prepareTable}
 \usage{
-prepareTable(GGIRoutputdir, id, lang)
+prepareTable(GGIRoutputdir, id, lang, maskingFile)
 }
 \arguments{
 \item{GGIRoutputdir}{Path to GGIR output folder, e.g. C:/output_mystudy}
@@ -12,6 +12,8 @@ prepareTable(GGIRoutputdir, id, lang)
 \item{id}{Character, the id of the recording}
 
 \item{lang}{Character, language to use fr=french, en=english}
+
+\item{maskingFile}{Character to point to csv file with dates to be masked per ID}
 }
 \value{
 no object is returned, text is printed with cat

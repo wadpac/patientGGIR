@@ -4,7 +4,13 @@
 \alias{plot_lux_sleep_act_cr}
 \title{plot_lux_sleep_act_cr}
 \usage{
-plot_lux_sleep_act_cr(GGIRoutputdir, id, lang = "fr", desiredtz = "")
+plot_lux_sleep_act_cr(
+  GGIRoutputdir,
+  id,
+  lang = "fr",
+  desiredtz = "",
+  maskingFile = NULL
+)
 }
 \arguments{
 \item{GGIRoutputdir}{Path to GGIR output folder, e.g. C:/output_mystudy}
@@ -14,6 +20,8 @@ plot_lux_sleep_act_cr(GGIRoutputdir, id, lang = "fr", desiredtz = "")
 \item{lang}{Character, language to use fr=french, en=english}
 
 \item{desiredtz}{Character, timezone from timezone data base names, see also GGIR documentation.}
+
+\item{maskingFile}{Character to point to csv file with dates to be masked per ID}
 }
 \value{
 no object is returned, only a plot is generated
