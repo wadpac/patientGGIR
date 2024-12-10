@@ -159,9 +159,16 @@ prepareTable = function(GGIRoutputdir, id, lang) {
       daydata$weekday = gsub(pattern = weekday_English[i], replacement = weekday_NewLang[i], x = daydata$weekday)
     }
   }
+  imputeColumID = which(names(daydata) == labels[13, lang])
+  days_imputed = which(daydata[,imputeColumID] != "0000")
+  if (length(days_imputed) > 0) {
+    daydata$weekday[days_imputed] = paste0(daydata$weekday[days_imputed], "*")
+  }
+  daydata = daydata[, -imputeColumID]
+  summaryColumn = summaryColumn[-imputeColumID]
   
   daydata = cbind(t(daydata), summaryColumn)
-  endSleepSection = 7 #ifelse(diaryImputationCodeAvailable, 7, 6)
+  endSleepSection = 6
   daydata = rbind(daydata[1,],
                   rep("", ncol(daydata)),
                   daydata[2:endSleepSection,],
