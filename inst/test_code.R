@@ -13,9 +13,17 @@ library(kableExtra)
 # idsep = "_"
 # GGIRoutputdir = "D:/Dropbox/Work/sharedfolder/projects/ERC_Paris/Clinic/Circame_2024_bin/output_S20_2024_copie"
 # GGIRoutputdir = "~/Dropbox/Work/sharedfolder/projects/ERC_Paris/Clinic/Circame_2024_bin/output_S20_2024_copie"
-GGIRoutputdir = "~/data/ERC_Circame/output_bins"
-idsep = "[.]"
-lang = "fr"
+# GGIRoutputdir = "~/data/ERC_Circame/output_bins"
+# idsep = "[.]"
+
+
+# GGIRoutputdir = "D:/Dropbox/Work/sharedfolder/projects/ERC_Paris/Clinic/Circame_2024_bin/output_S20_2024_copie"
+# idsep = "[.]"
+
+
+GGIRoutputdir = "D:/Dropbox/Work/sharedfolder/projects/ERC_Paris/Clinic/output_realCircameData"
+idsep = "_"
+lang = "fr" #"fr"
 
 # # # ================================================
 # source("R/plot_lux_sleep_act_cr.R")
@@ -32,8 +40,8 @@ lang = "fr"
 
 # 
 # 
-# # # ================================================
-# # # Run prepare table code in isolation
+# ================================================
+# Run prepare table code in isolation
 # source("R/prepareTable.R")
 # getID = function(x) {
 #   x = gsub(pattern = "meta_", replacement = "", x = x)

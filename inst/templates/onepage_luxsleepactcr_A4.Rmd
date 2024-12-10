@@ -38,7 +38,7 @@ knitr::opts_chunk$set(echo = TRUE)
 data = prepareTable(GGIRoutputdir, id, lang) 
 
 # Write table to report
-writeReportTable(data, id)
+writeReportTable(data, id, lang)
 
 ```
 
