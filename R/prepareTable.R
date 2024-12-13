@@ -201,10 +201,11 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   endSleepSection = 6
   daydata = rbind(daydata[1,],
                   rep("", ncol(daydata)),
-                  daydata[2:endSleepSection,],
-                  matrix("", ifelse(diaryImputationCodeAvailable == FALSE, 2, 1), ncol(daydata)),
-                  daydata[(endSleepSection + 1):nrow(daydata),])
-  row.names(daydata)[c(2, (endSleepSection + 2))] = labels[5:6, lang]
+                  daydata[(endSleepSection + 1):nrow(daydata),],
+                  rep("", ncol(daydata)),
+                  # matrix("", ifelse(diaryImputationCodeAvailable == FALSE, 2, 1), ncol(daydata)),
+                  daydata[2:endSleepSection,])
+  row.names(daydata)[c(2, (endSleepSection + 1))] = labels[5:6, lang]
   row.names(daydata)[grep(pattern = "weekday", x = row.names(daydata))] = "Day of the week"
   colnames(daydata) = daydata[1,]
   daydata = daydata[-1,]

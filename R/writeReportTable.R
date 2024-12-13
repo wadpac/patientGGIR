@@ -11,9 +11,9 @@
 
 writeReportTable = function(data, id, lang) {
   if (lang == "fr") {
-    label = "Le journal était incomplet ou peu clair, ce que nous avons corrigé"
+    label = "En l'absence d'information du questionnaire journalier pour ce jour, ces informations pourraient être de qualité moindre."
   } else if (lang == "en") {
-    label = "The diary was incomplete or unclear, which we corrected for"
+    label = "In the absence of information from the daily questionnaire for this day, this information could be of lower quality."
   }
   explainAsterisk = ifelse(test = length(grep(pattern = "[*]", x = colnames(data))) > 0,
                            yes = paste0("; * = ", label), no = "")
@@ -24,6 +24,6 @@ writeReportTable = function(data, id, lang) {
     column_spec(1, width = "4cm") |>
     row_spec(0, bold = TRUE) |>
     row_spec(1, bold = TRUE) |>
-    row_spec(7, bold = TRUE) |>
+    row_spec(6, bold = TRUE) |>
     kable_styling(font_size = 8)
 }
