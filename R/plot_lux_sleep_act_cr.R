@@ -50,7 +50,7 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   
   # identify dates that will be table
   P5D = read.csv(file = paste0(GGIRoutputdir, "/results/part5_daysummary_WW_L40M100V400_T5A5.csv"))
-  dates_in_table = as.Date(P5D[grep(pattern = id, x = P5D$ID), "calendar_date"])
+  windows_in_table = P5D[grep(pattern = id, x = P5D$ID), "window_number"]
   
   if (length(grep(pattern = "[.]RData", x = P5ts[grep(id, P5ts)])) > 0) {
     load(file = P5ts[grep(id, basename(P5ts))])
@@ -66,27 +66,26 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   D = aggregate(D[,c("ACC","window","sib","SleepPeriodTime", "invalidepoch")], by = list(D$timenum), FUN = mean)
   colnames(D)[1] = "timenum"
   D$time = as.POSIXlt(D$timenum, tz = desiredtz, origin = "1970-1-1")
-  # Constrain time series to date range as found in cleaned part 5 report
-  constrainDates = function(x, timecol = "time", dateRange) {
-    x = x[which(as.Date(x[, timecol]) >= dateRange[1] &
-                  as.Date(x[, timecol]) <= dateRange[2]), ]
+  constrainTime = function(x, timecol = "time", timeRange) {
+    x = x[which(x[, timecol] >= timeRange[1] &
+                  x[, timecol] <= timeRange[2]), ]
   }
-  D = constrainDates(x = D, timecol = "time", dateRange = range(dates_in_table))
-
+  # Constrain time series to window range as found in cleaned part 5 report
+  D = D[which(D$window >= min(windows_in_table) & D$window <= max(windows_in_table)), ]
+  timeRange = range(D$timenum)
   
   D$clocktime = format(D$time,"%H:%M")
   D$sib = round(D$sib)
   D$sib[which(D$SleepPeriodTime == 0)] = 0
-  M$metashort$timestamp = as.POSIXlt(M$metashort$timestamp,
+  M$metashort$timestamp = as.POSIXct(M$metashort$timestamp,
                                      format = "%Y-%m-%dT%H:%M:%S%z", desiredtz)
-  # Constrain time series to date range as found in cleaned part 5 report
-  M$metashort = constrainDates(x = M$metashort, timecol = "timestamp", dateRange = range(dates_in_table))
-  M$metalong = constrainDates(x = M$metalong, timecol = "timestamp", dateRange = range(dates_in_table))
+  M$metalong$timestamp = as.POSIXct(M$metalong$timestamp,
+                                     format = "%Y-%m-%dT%H:%M:%S%z", desiredtz)
+  # Constrain time series to time range matching windows as found in cleaned part 5 report
+  M$metashort = constrainTime(x = M$metashort, timecol = "timestamp", timeRange = timeRange)
+  M$metalong = constrainTime(x = M$metalong, timecol = "timestamp", timeRange = timeRange)
   LUXTEMP = M$metalong
   Mshort = M$metashort
-  
-  LUXTEMP$timestamp = as.POSIXlt(LUXTEMP$timestamp, format = "%Y-%m-%dT%H:%M:%S%z", desiredtz)
-  
   #-------------------------------------------------
   # detect sibs:
   Mshort$anglez[which(is.na(Mshort$anglez) == T)] = 0
@@ -126,8 +125,9 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   Mshort = Mshort[which(Mshort$timestamp >= minT & Mshort$timestamp <= maxT),]
   LUXTEMP = LUXTEMP[which(LUXTEMP$timestamp >= minT & LUXTEMP$timestamp <= maxT),]
   # tickmarks = which(D$clocktime == "00:00" | D$clocktime == "12:00")
-  tickmarks = which(D$clocktime == "00:00" & D$windwow) # long tickmarks
+  tickmarks = which(D$clocktime == "00:00") # long tickmarks
   timeat = D$time[tickmarks]
+  timeat = c(timeat[1]-24*3600, timeat, timeat[length(timeat)] + 24*3600)
   timeval = D$clocktime[tickmarks]
   tickmarks2 = which(D$clocktime == "12:00")
   timeat2 = D$time[tickmarks2]
@@ -143,8 +143,9 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   }
   # wkday = substr(wkday, start = 1, stop = 3)
   
-  dayborders = which(D$clocktime == "00:00")
-  dayborders2 = which(format(Mshort$timestamp,"%H:%M") == "00:00")
+  windowBorders = which(diff(D$window) != 0)
+  dayBorders = Mshort$timenum[which(format(Mshort$timestamp,"%H:%M") == "00:00")]
+  windowBorders2 = which(format(Mshort$timestamp) %in% format(D$time[windowBorders]))
   # Night time sib blocks
   Mshort$sib_day = Mshort$sibs
   Mshort$sib_night = Mshort$sibs
@@ -195,28 +196,21 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   if (1 %in% D$invalidepoch) {
     Mshort[which(D$invalidepoch == 1), grep(pattern = "time", x = colnames(Mshort))] = NA
   }
-  
-  
-  # Mask dates listed in the masking file
+  # Mask windows listed in the masking file
   maskDates = NULL
   if (!is.null(maskingFile)) {
     mask = data.table::fread(file = maskingFile, data.table = FALSE)
     if (id %in% mask$ID) {
       mask = mask[which(mask$ID == id),]
-      if (length(grep("/", mask$date)) > 0) {
-        dsep = "/"
-      } else {
-        dsep = "-"
-      }
-      maskDates = as.Date(mask$date, paste0("%d", dsep, "%m", dsep, "%Y"))
-      tmp = which(as.Date(Mshort$timestamp) %in% maskDates)
-      if (tmp[1] == 1) tmp = tmp[-1] # prevent entire first day to be excluded
+      tmp = which(Mshort$timenum %in% D$timenum[which(D$window %in% mask$window)])
       if (length(tmp) > 0)  {
+        if (tmp[1] == 1) tmp = tmp[-1] # prevent entire first day to be excluded
+        
         Mshort[tmp, grep(pattern = "time", x = colnames(Mshort))] = NA
       }
-      tmp = which(as.Date(LUXTEMP$timestamp) %in% maskDates)
-      if (tmp[1] == 1) tmp = tmp[-1] # prevent entire first day to be excluded
+      tmp = which(LUXTEMP$timestamp %in% D$timenum[which(D$window %in% mask$window)])
       if (length(tmp) > 0)  {
+        if (tmp[1] == 1) tmp = tmp[-1] # prevent entire first day to be excluded
         LUXTEMP[tmp, grep(pattern = "time", x = colnames(LUXTEMP))] = NA
       }
     }
@@ -237,7 +231,7 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   plot(LUXTEMP$timestamp, LUXTEMP$lightpeak / 1000, type = "l",
        xlab = "", ylab = "", cex.main = 2,  axes = F, ylim = c(0,  20),
        font.lab = 2, lwd = 0.8, col = "gold2")
-  abline(v = Mshort$timenum[dayborders2], lty = 2, col = "grey")
+  # abline(v = Mshort$timenum[windowBorders2], lty = 2, col = "grey")
   abline(h = 1, lty = 2, col = "grey")
   mtext(labels[1, lang], side = 2, line = 1, las = 1, 
         cex = lab_cex_left, col = "black", outer = FALSE, font = 2)
@@ -245,11 +239,23 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   mtext(text = c(labels[2, lang], labels[3, lang]), at = c(1, 19),
         side = 4, line = 3, las = 1, cex = lab_cex_right, col = "black", outer = FALSE)
 
+  #=== ROW (Acceleration)
+  plot(Mshort$timestamp, Mshort$ENMO * 1000, type = "l", xlab = "", ylab = "",
+       axes = F, ylim = c(0, 200), font.lab = 2, col = "red", lwd = 0.8)
+  mtext(labels[7, lang], adj = 1, side = 2, line = 1,
+        las = 1, cex = lab_cex_left, col = "black", outer = FALSE, font = 2)
+  axis(4)
+  abline(h = 100, lty = 2, col = "grey")
+  mtext(text = c(labels[8, lang], labels[9, lang]),
+        at = c(10, 190),
+        side = 4, line = 3, las = 1, cex = lab_cex_right,
+        col = "black", outer = FALSE)
+  
   #=== ROW (Sleep)
   # Set all invalid epochs to NA
   plot(0:1, 0:1, type = "l", xlab = "", ylab = "", axes = F, 
        xlim = range(as.numeric(Mshort$timestamp[range(which(is.na(Mshort$timestamp) == FALSE))])),
-       ylim = c(-90, 90), font.lab = 2, col = "white")
+       ylim = c(-95, 95), font.lab = 2, col = "white")
   for (window in c("day", "night")) {
     if (window == "day") {
       delta_sib = diff(c(0L, Mshort$sib_day, 0L))
@@ -271,25 +277,11 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
     }
   }
   lines(Mshort$timestamp, Mshort$anglez, type = "l", lwd = 0.8)
-  abline(v = Mshort$timenum[dayborders2], lty = 2, col = "grey")
   mtext(labels[4, lang], side = 2, line = 1, las = 1, cex = lab_cex_left, 
         col = "black", outer = FALSE, font = 2)
   legend("topright", legend = c(labels[5, lang], labels[6, lang]),
-         col = c("purple", "blue"),lty = c(1, 1), lwd = c(1.5, 1.5),
+         col = c("purple", "blue"),lty = c(1, 1), lwd = c(2.5, 2.5),
          title = labels[4, lang], inset = c(-0.2, 0), xpd = TRUE, cex = 1.1)
-  
-  #=== ROW (Acceleration)
-  plot(Mshort$timestamp, Mshort$ENMO * 1000, type = "l", xlab = "", ylab = "",
-       axes = F, ylim = c(0, 200), font.lab = 2, col = "red", lwd = 0.8)
-  mtext(labels[7, lang], adj = 1, side = 2, line = 1,
-        las = 1, cex = lab_cex_left, col = "black", outer = FALSE, font = 2)
-  axis(4)
-  abline(h = 100, lty = 2, col = "grey")
-  abline(v = Mshort$timenum[dayborders2], lty = 2, col = "grey")
-  mtext(text = c(labels[8, lang], labels[9, lang]),
-        at = c(10, 190),
-        side = 4, line = 3, las = 1, cex = lab_cex_right,
-        col = "black", outer = FALSE)
   
   #==== ROW (Circadian rhythm)
   par(mar = c(4, 0.5, 0.1, 9))
@@ -300,11 +292,11 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
        lwd = 0.8, col = "lightgreen", ylim = c(0, log((500) + 1)))
   lines(Mshort$timestamp, Mshort$fittedY, type = "l", # pch = 20, cex = 0.2,
         col = "black", lty = 1, lwd = LWD)
-  # lines(Mshort$timestamp, Mshort$fittedYext, type = "l",
-  #       col = "black", lty = 3, lwd = LWD)
-  axis(side = 1, line = 0, at = as.numeric(timeat2), labels = wkday,
+  axis(side = 1, line = 1, at = as.numeric(timeat2), labels = wkday,
        col = NA, col.ticks = NA, cex.axis = 1.1)
-  abline(v = D$timenum[dayborders], lty = 2, col = "grey")
+  axis(side = 1, line = 0, at = as.numeric(timeat), labels = rep("0h", length(timeat)),
+       cex.axis = 0.8, tick = TRUE) #col = NA, col.ticks = NA,
+  
   mtext(labels[12, lang], padj = 0, side = 2, line = 1, las = 1, 
         cex = lab_cex_left, col = "black", outer = FALSE, font = 2)
   mtext(labels[13, lang],

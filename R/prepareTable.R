@@ -17,12 +17,13 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   labels[2, ] = c("Heure du r\u00E9veil", "Wake up time")
   labels[3, ] = c("Moyenne", "Average")
   labels[4, ] = c("D\u00E9but de la p\u00E9riode de 5 heures la plus active", "Start of the most active 5 hour period")
-  labels[5, ] = c("Sommeil noturne:", "Nighttime sleep:")
-  labels[6, ] = c("Activit\u00E9 en journ\u00E9e:", "Daytime activity:")
-  labels[7, ] = c("Temps pass\u00E9 au lit", "Time spent in bed")
+  labels[5, ] = c("Activit\u00E9 en journ\u00E9e:", "Daytime activity:")
+  labels[6, ] = c("Sommeil noturne:", "Nighttime sleep:")
+  labels[7, ] = c("Temps total \u00E9coul\u00E9 entre l'endormissement et le r\u00E9veil",
+                  "Total time from falling asleep to waking up")
   labels[8, ] = c("Temps pass\u00E9 \u00E0 dormir", "Time spent sleeping")
-  labels[9, ] = c("Proportion de temps dormi par rapport au temps pass\u00E9 au lit",
-                  "Proportion of time slept compared to time spent in bed")
+  labels[9, ] = c("Proportion de temps dormi entre l'endormissement et le r\u00E9veil",
+                  "Proportion of time slept between falling asleep and waking up")
   labels[10, ] = c("Temps d'activit\u00E9 physique",
                    "Time spent in moderate or vigorous activity")
   labels[11, ] = c("Temps d'activit\u00E9 l\u00E9g\u00E8re",
@@ -33,19 +34,23 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   labels = as.data.frame(x = labels)
   colnames(labels) = c("fr", "en")
   
-  maskDates = NULL
-  if (!is.null(maskingFile)) {
-    mask = data.table::fread(file = maskingFile, data.table = FALSE)
-    if (id %in% mask$ID) {
-      mask = mask[which(mask$ID == id),]
-      if (length(grep("/", mask$date)) > 0) {
-        dsep = "/"
-      } else {
-        dsep = "-"
-      }
-      maskDates = as.Date(mask$date, paste0("%d", dsep, "%m", dsep, "%Y"))
-    }
-  }
+  # maskDates = NULL
+  # if (!is.null(maskingFile)) {
+  #   mask = data.table::fread(file = maskingFile, data.table = FALSE)
+  #   if (id %in% mask$ID) {
+  #     mask = mask[which(mask$ID == id),]
+  #     if (length(grep("/", mask$date)) > 0) {
+  #       dsep = "/"
+  #     } else {
+  #       dsep = "-"
+  #     }
+  #     maskDates = as.Date(mask$date, paste0("%d", dsep, "%m", dsep, "%Y"))
+  #   }
+  # }
+  
+
+  
+  
   
   # Load all GGIR results (always in English)
   P2D = read.csv(file = paste0(GGIRoutputdir, "/results/part2_daysummary.csv"))
@@ -65,9 +70,25 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
                                               "dur_day_total_MOD_min",
                                               "dur_day_total_LIG_min",
                                               "dur_day_total_IN_min",
-                                              "weekday", "calendar_date")]
+                                              "weekday", "calendar_date", "window_number")]
   summaryColumn = rep("", 11)
   P5D$calendar_date = as.Date(P5D$calendar_date, format = "%Y-%m-%d")
+  
+  
+  # Mask windows listed in the masking file
+  maskDates = NULL
+  if (!is.null(maskingFile)) {
+    mask = data.table::fread(file = maskingFile, data.table = FALSE)
+    if (id %in% mask$ID) {
+      mask = mask[which(mask$ID == id),]
+      tmp = which(P5D$window_number %in% mask$window)
+      if (length(tmp) > 0) {
+        maskDates = P5D$calendar_date[tmp]
+      }
+    }
+  }
+  P5D = P5D[, which(colnames(P5D) != "window_number")]
+  
  
   # Sleep
   shortenTime = function(time) {
@@ -196,7 +217,6 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   }
   daydata = daydata[, -imputeColumID]
   summaryColumn = summaryColumn[-imputeColumID]
-  
   daydata = cbind(t(daydata), summaryColumn)
   endSleepSection = 6
   daydata = rbind(daydata[1,],

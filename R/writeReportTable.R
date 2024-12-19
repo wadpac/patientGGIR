@@ -16,11 +16,11 @@ writeReportTable = function(data, id, lang) {
     label = "In the absence of information from the daily questionnaire for this day, this information could be of lower quality."
   }
   explainAsterisk = ifelse(test = length(grep(pattern = "[*]", x = colnames(data))) > 0,
-                           yes = paste0("; * = ", label), no = "")
+                           yes = paste0("; * ", label), no = "")
   kableExtra::kbl(data, booktabs = TRUE) |>
     kableExtra::kable_styling(latex_options = c("striped", "hold_position"), full_width = FALSE) %>%
     footnote(general = paste0("ID: ", id, explainAsterisk),
-             footnote_as_chunk = TRUE) |>
+             footnote_as_chunk = TRUE,  general_title = "") |>
     column_spec(1, width = "4cm") |>
     row_spec(0, bold = TRUE) |>
     row_spec(1, bold = TRUE) |>
