@@ -25,7 +25,7 @@ GGIRoutputdir = "D:/Dropbox/Work/sharedfolder/projects/ERC_Paris/Clinic/output_r
 maskingFile = "D:/Dropbox/Work/sharedfolder/projects/ERC_Paris/Clinic/output_realCircameData/maskingFile.csv"
 idsep = "_"
 lang = "fr" #"fr"
-
+# 
 # # # ================================================
 # source("R/plot_lux_sleep_act_cr.R")
 # getID = function(x) {
@@ -38,6 +38,7 @@ lang = "fr" #"fr"
 # x11()
 # plot_lux_sleep_act_cr(GGIRoutputdir = GGIRoutputdir, id = ids[9],
 #                       lang = lang, desiredtz = "Europe/London", maskingFile = maskingFile)
+# kkkk
 # 
 # 
 # ================================================
@@ -54,6 +55,6 @@ lang = "fr" #"fr"
 # Run code as called from within Markdown
 creatReport(GGIRoutputdir = GGIRoutputdir,
             lang = lang, idsep = idsep, desiredtz = "Europe/Paris", type = "onepage_luxsleepactcr_A4",
-            deviceName = "GENEActiv", maskingFile = maskingFile)
+            deviceName = "GENEActiv", maskingFile = NULL) #maskingFile)
 
 

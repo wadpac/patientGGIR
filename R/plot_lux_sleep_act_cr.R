@@ -165,31 +165,23 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   load(fn2)
   cosinor_ts = SUM$cosinor_ts
   
-  # attempt to align cosinor timeseries
-  cosvars = SUM$summary[grep(pattern = "cosinor", x = names(SUM$summary), value = TRUE)]
-  minute_0 = as.numeric(format(Mshort$timestamp[1], "%H")) * 60 + as.numeric(format(Mshort$timestamp[1], "%M"))
-  minute_1 = minute_0 + floor((nrow(Mshort) * reso) / 60)
-  cosinor_ts = cosinor_ts[minute_0:minute_1,]
+  # align cosinor timeseries
   
-  drops = which(cosinor_ts$time[2:nrow(cosinor_ts)] < cosinor_ts$time[1:(nrow(cosinor_ts) - 1)]) + 1
-  for (k in drops) {
-    cosinor_ts$time[k:nrow(cosinor_ts)] = cosinor_ts$time[k:nrow(cosinor_ts)] + 24
-  }
-  cosinor_ts$time_sec =  cosinor_ts$time * 3600
-  cosinor_ts$time_epoch = round(cosinor_ts$time_sec / reso) * reso
+  # add timestamps
+  cosvars = SUM$summary[grep(pattern = "cosinor", x = names(SUM$summary), value = TRUE)]
+  epochSize = min(diff(cosinor_ts$time_across_days[1:20]) * 3600)
+  firstMidnight = as.POSIXct(ceiling(as.numeric(Mshort$timestamp[1]) / (24*3600)) * 24*3600, tz = desiredtz)
+  firstTimestamp = firstMidnight - cosvars$cosinor_timeOffsetHours
+  cosinor_ts$timestamp = seq(from = firstTimestamp, length.out = length(cosinor_ts$time), by = epochSize)
+  # downsample to match resolution needed for plot
+  cosinor_ts$time_epoch = round(as.numeric(cosinor_ts$timestamp) / reso) * reso
   cosinor_ts2 = aggregate(x = cosinor_ts, by = list(cosinor_ts$time_epoch), FUN = mean)
   if (nrow(cosinor_ts2) > nrow(Mshort)) {
     cosinor_ts2 = cosinor_ts2[1:nrow(Mshort),]
   }
+  cosinor_ts$timestamp = as.POSIXct(cosinor_ts$timestamp, tz = desiredtz)
   
-  deltatime = table(diff(as.numeric(cosinor_ts2$time_epoch)))
-  if (length(deltatime) > 1) {
-    epochSize = as.numeric(names(deltatime)[1])
-    NEWTIME = seq(cosinor_ts2$time_epoch[1], cosinor_ts2$time_epoch[nrow(cosinor_ts2)], by = epochSize)
-    tmpdf = data.frame(time_epoch = NEWTIME)
-    cosinor_ts2 = merge(tmpdf, cosinor_ts2, by = "time_epoch", all.x = TRUE)
-  }
-  cosinor_ts2$timestamp = Mshort$timestamp[1] + cosinor_ts2$time_epoch
+  # merge with Mshort
   cosinor_ts2 =  cosinor_ts2[, c("timestamp", "original", "fittedY")]
   Mshort = merge(Mshort, cosinor_ts2, by = "timestamp", all.x = TRUE)
   # Set all invalid epochs to NA
