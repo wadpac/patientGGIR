@@ -170,17 +170,15 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   # add timestamps
   cosvars = SUM$summary[grep(pattern = "cosinor", x = names(SUM$summary), value = TRUE)]
   epochSize = min(diff(cosinor_ts$time_across_days[1:20]) * 3600)
-  firstMidnight = as.POSIXct(ceiling(as.numeric(Mshort$timestamp[1]) / (24*3600)) * 24*3600, tz = desiredtz)
-  firstTimestamp = firstMidnight - cosvars$cosinor_timeOffsetHours
-  cosinor_ts$timestamp = seq(from = firstTimestamp, length.out = length(cosinor_ts$time), by = epochSize)
+  cosinor_ts$timestamp = seq(from = Mshort$timestamp[1], length.out = length(cosinor_ts$time), by = epochSize)
   # downsample to match resolution needed for plot
   cosinor_ts$time_epoch = round(as.numeric(cosinor_ts$timestamp) / reso) * reso
   cosinor_ts2 = aggregate(x = cosinor_ts, by = list(cosinor_ts$time_epoch), FUN = mean)
-  if (nrow(cosinor_ts2) > nrow(Mshort)) {
-    cosinor_ts2 = cosinor_ts2[1:nrow(Mshort),]
-  }
-  cosinor_ts$timestamp = as.POSIXct(cosinor_ts$timestamp, tz = desiredtz)
-  
+  cosinor_ts2$timestamp = as.POSIXct(cosinor_ts2$timestamp, tz = desiredtz)
+  # match times based on correlation, because data is the same and timestamps are not stored
+  out = ccf(cosinor_ts2$original, log(Mshort$ENMO * 1000 + 1), lag.max = 300)
+  timeShiftSeconds = (which.max(out$acf) - 300) * reso
+  cosinor_ts2$timestamp = cosinor_ts2$timestamp - timeShiftSeconds
   # merge with Mshort
   cosinor_ts2 =  cosinor_ts2[, c("timestamp", "original", "fittedY")]
   Mshort = merge(Mshort, cosinor_ts2, by = "timestamp", all.x = TRUE)
