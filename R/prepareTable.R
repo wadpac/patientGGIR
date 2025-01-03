@@ -34,24 +34,6 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   labels = as.data.frame(x = labels)
   colnames(labels) = c("fr", "en")
   
-  # maskDates = NULL
-  # if (!is.null(maskingFile)) {
-  #   mask = data.table::fread(file = maskingFile, data.table = FALSE)
-  #   if (id %in% mask$ID) {
-  #     mask = mask[which(mask$ID == id),]
-  #     if (length(grep("/", mask$date)) > 0) {
-  #       dsep = "/"
-  #     } else {
-  #       dsep = "-"
-  #     }
-  #     maskDates = as.Date(mask$date, paste0("%d", dsep, "%m", dsep, "%Y"))
-  #   }
-  # }
-  
-
-  
-  
-  
   # Load all GGIR results (always in English)
   P2D = read.csv(file = paste0(GGIRoutputdir, "/results/part2_daysummary.csv"))
   P2D = P2D[grep(pattern = id, x = P2D$ID), c("M5hr_ENMO_mg_0.24hr",
@@ -93,11 +75,17 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
     warning(paste0("Report for ", id, " failed."), call. = FALSE)
     return()
   }
+  #=============================================================================
   # Sleep
   shortenTime = function(time) {
     return(paste0(unlist(strsplit(time, ":"))[1:2], collapse = ":"))
   }
   readableHours = function(hours) {
+    if (hours == "-") {
+      return(hours)
+    } else {
+      hours = as.numeric(hours)
+    }
     HR = floor(hours)
     MINS = floor((hours - HR) * 60)
     MINS = paste0(ifelse(MINS < 10, yes = "0", no = ""), MINS)
@@ -123,12 +111,8 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
       P4N = P4N[-rem, ]
     }
   }
-  summaryColumn[1] = labels[3, lang] #sur les 7 jours
-  summaryColumn[4] = readableHours(mean(P4N$SptDuration, rm.na = TRUE))
-  summaryColumn[5] = readableHours(mean(P4N$SleepDurationInSpt, rm.na = TRUE))
-  summaryColumn[6] = paste0(round(mean((P4N$SleepDurationInSpt / P4N$SptDuration) * 100,
-                                       rm.na = TRUE)), "%")
   rowIndex = 7
+  
   # Add diary imputaton code, if present, as final row
   load(paste0(GGIRoutputdir, "/meta/sleeplog.RData"))
   impcode = which(logs_diaries$imputecodelog$ID == id)
@@ -141,9 +125,6 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
     P4N = P4N[, which(colnames(P4N) != "id")]
     summaryColumn[rowIndex] = ""
   }
-  P4N$SptDuration = unlist(lapply(X = P4N$SptDuration, FUN = readableHours))
-  P4N$SleepDurationInSpt = unlist(lapply(X = P4N$SleepDurationInSpt, FUN = readableHours))
-  
   names(P4N)[grep(pattern = "SptDuration", x = names(P4N))] = labels[7, lang]
   names(P4N)[grep(pattern = "SleepDurationInSpt", x = names(P4N))] = labels[8, lang]
   names(P4N)[grep(pattern = "ratio", x = names(P4N))] = labels[9, lang]
@@ -154,6 +135,21 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   }
   P4N = P4N[, grep(pattern = "cleaningcode", x = colnames(P4N), invert = TRUE)]
   
+  # Average
+  summaryColumn[1] = labels[3, lang] #sur les 7 jours
+  validP4N = which(P4N[,labels[7, lang]] != "-")
+  if (length(validP4N) > 0) {
+    SptDuration = as.numeric(P4N[validP4N, labels[7, lang]])
+    SleepSptDurationInSpt = as.numeric(P4N[validP4N, labels[8, lang]])
+    summaryColumn[4] = readableHours(mean(SptDuration, rm.na = TRUE))
+    summaryColumn[5] = readableHours(mean(SleepSptDurationInSpt, rm.na = TRUE))
+    summaryColumn[6] = paste0(round(mean((SleepSptDurationInSpt / SptDuration) * 100,
+                                         rm.na = TRUE)), "%")
+  }
+  P4N[, labels[7, lang]] = unlist(lapply(X = P4N[, labels[7, lang]], FUN = readableHours))
+  P4N[, labels[8, lang]] = unlist(lapply(X = P4N[, labels[8, lang]], FUN = readableHours))
+  
+  #=============================================================================
   # Physical activity
   vigvar = grep(pattern = "total_VIG", x = names(P5D))
   modvar = grep(pattern = "total_MOD", x = names(P5D))
@@ -180,18 +176,14 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   P2D$calendar_date = as.Date(P2D$calendar_date, format = "%Y-%m-%d")
   names(P2D)[grep(pattern = "M5hr_ENMO_mg_0.24hr", x = names(P2D))] = labels[4, lang]
   
-  daydata = merge(P4N, P5D, by = c( "calendar_date","weekday")) #
-  daydata = merge(daydata, P2D, by = c("calendar_date", "weekday")) #,
+  daydata = merge(P4N, P5D, by = c( "calendar_date","weekday"), all = TRUE) #
+  daydata = merge(daydata, P2D, by = c("calendar_date", "weekday"), all = TRUE) #,
   if (nrow(daydata) == 0) {
     warning(paste0("Report for ", id, " failed."), call. = FALSE)
     return()
   }
   daydata = daydata[order(daydata$calendar_date), ]
-  # Add missing days as empty columns
-  
-  # Dummy data for testing
-  # daydata = data.frame(calendar_date = as.Date(c("2024-06-03", "2024-06-04", "2024-06-06", "2024-06-07")),
-  #                      value = 1:4)
+  # Add missing days as empty columns (this will not affect average)
   dRange = range(sort(unique(c(daydata$calendar_date, maskDates))))
   expectedDate = dRange[1]:dRange[2]
   missingDates = as.Date(expectedDate[which(expectedDate %in% daydata$calendar_date == FALSE)])
