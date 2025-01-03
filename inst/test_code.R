@@ -25,8 +25,8 @@ GGIRoutputdir = "D:/Dropbox/Work/sharedfolder/projects/ERC_Paris/Clinic/output_r
 maskingFile = "D:/Dropbox/Work/sharedfolder/projects/ERC_Paris/Clinic/output_realCircameData/maskingFile.csv"
 idsep = "_"
 lang = "fr" #"fr"
-# 
-# # # ================================================
+
+# ================================================
 # source("R/plot_lux_sleep_act_cr.R")
 # getID = function(x) {
 #   x = gsub(pattern = "meta_", replacement = "", x = x)
@@ -36,11 +36,9 @@ lang = "fr" #"fr"
 # 
 # 
 # x11()
-# plot_lux_sleep_act_cr(GGIRoutputdir = GGIRoutputdir, id = ids[9],
+# plot_lux_sleep_act_cr(GGIRoutputdir = GGIRoutputdir, id = grep("C010152OB",ids, value = TRUE),
 #                       lang = lang, desiredtz = "Europe/London", maskingFile = maskingFile)
 # kkkk
-# 
-# 
 # ================================================
 # Run prepare table code in isolation
 # source("R/prepareTable.R")
@@ -50,8 +48,8 @@ lang = "fr" #"fr"
 # }
 # ids = unlist(lapply(dir(paste0(GGIRoutputdir, "/meta/basic"), full.names = FALSE), FUN = getID))
 # 
-# data = prepareTable(GGIRoutputdir, id = ids[1], lang, maskingFile = maskingFile)
-
+# data = prepareTable(GGIRoutputdir, id = grep("C010152OB",ids, value = TRUE), lang, maskingFile = maskingFile)
+# kkk
 # Run code as called from within Markdown
 creatReport(GGIRoutputdir = GGIRoutputdir,
             lang = lang, idsep = idsep, desiredtz = "Europe/Paris", type = "onepage_luxsleepactcr_A4",

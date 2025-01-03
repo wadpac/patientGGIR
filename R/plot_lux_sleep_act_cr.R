@@ -84,6 +84,10 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   # Constrain time series to time range matching windows as found in cleaned part 5 report
   M$metashort = constrainTime(x = M$metashort, timecol = "timestamp", timeRange = timeRange)
   M$metalong = constrainTime(x = M$metalong, timecol = "timestamp", timeRange = timeRange)
+  if (nrow(M$metalong) == 0 | nrow(M$metashort) == 0) {
+    warning(paste0("Report for ", id, " failed."), call. = FALSE)
+    return()
+  }
   LUXTEMP = M$metalong
   Mshort = M$metashort
   #-------------------------------------------------
@@ -155,6 +159,7 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   y0 = 90
   y1 = -90
   # Set all invalid epochs to NA
+  starttime = Mshort$timestamp[1]
   if (1 %in% D$invalidepoch) {
     Mshort[which(D$invalidepoch == 1), grep(pattern = "time", x = colnames(Mshort))] = NA
     LUXTEMP[which(LUXTEMP$nonwearscore >= 2), grep(pattern = "time", x = colnames(LUXTEMP))] = NA
@@ -170,7 +175,8 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   # add timestamps
   cosvars = SUM$summary[grep(pattern = "cosinor", x = names(SUM$summary), value = TRUE)]
   epochSize = min(diff(cosinor_ts$time_across_days[1:20]) * 3600)
-  cosinor_ts$timestamp = seq(from = Mshort$timestamp[1], length.out = length(cosinor_ts$time), by = epochSize)
+  cosinor_ts$timestamp = seq(from = starttime,
+                             length.out = length(cosinor_ts$time), by = epochSize)
   # downsample to match resolution needed for plot
   cosinor_ts$time_epoch = round(as.numeric(cosinor_ts$timestamp) / reso) * reso
   cosinor_ts2 = aggregate(x = cosinor_ts, by = list(cosinor_ts$time_epoch), FUN = mean)

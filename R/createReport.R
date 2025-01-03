@@ -32,11 +32,12 @@ creatReport = function(GGIRoutputdir = NULL, lang = "fr", idsep = "_", desiredtz
   
   # Extract ids to process
   getID = function(x) {
-    x = gsub(pattern = "meta_", replacement = "", x = x)
-    return(unlist(strsplit(x, idsep))[1])
+     return(unlist(strsplit(x, idsep))[1])
   }
-  ids = unlist(lapply(dir(paste0(GGIRoutputdir, "/meta/basic"), full.names = FALSE), FUN = getID))
-  
+  ids = unique(unlist(lapply(basename(dir(paste0(GGIRoutputdir, "/meta/ms5.outraw"),
+                                          pattern = "[.]RData",
+                                          full.names = FALSE,
+                                          recursive = TRUE)), FUN = getID)))
   if (lang == "fr") {
     if (is.null(deviceName)) deviceName = "capteur de mouvement"
     docTitle = paste0("Mesures de la montre ", deviceName)
@@ -44,18 +45,27 @@ creatReport = function(GGIRoutputdir = NULL, lang = "fr", idsep = "_", desiredtz
     if (is.null(deviceName)) deviceName = "Motion sensor watch"
     docTitle = paste0(deviceName, " measurements")
   }
+  
+  reportDir = paste0(GGIRoutputdir, "/patientReports")
+  if (!dir.exists(reportDir)) dir.create(reportDir)
   # Generate repots
   for (id in ids) {
     # plotfile = paste0(GGIRoutputdir, "/plot.png")
     plotfile = "./plot.png"
+    pdffilename =  paste0(id , "_report_", lang,".pdf")
     
-    rmarkdown::render(
-      input = type_template,
-      output_format = "pdf_document",
-      output_file = paste0(id , "_report_", lang,".pdf"),
-      output_dir = GGIRoutputdir,
-      params = list(GGIRoutputdir = GGIRoutputdir, id = id, plotfile = plotfile, lang = lang, desiredtz = desiredtz, docTitle = docTitle,
-                    deviceName = deviceName, maskingFile = maskingFile))
-    if (file.exists(plotfile)) file.remove(plotfile)
+    if (!file.exists(paste0(reportDir, "/", pdffilename))) {
+      cat(paste0("\nGenerate report for ", id, "\n"))
+      rmarkdown::render(
+        input = type_template,
+        output_format = "pdf_document",
+        output_file = pdffilename,
+        output_dir = GGIRoutputdir,
+        params = list(GGIRoutputdir = GGIRoutputdir, id = id, plotfile = plotfile, lang = lang, desiredtz = desiredtz, docTitle = docTitle,
+                      deviceName = deviceName, maskingFile = maskingFile))
+      if (file.exists(plotfile)) file.remove(plotfile)
+      file.rename(from = paste0(GGIRoutputdir, "/", pdffilename),
+                to = paste0(reportDir, "/", pdffilename))
+    }
   }
 }

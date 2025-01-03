@@ -89,7 +89,10 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   }
   P5D = P5D[, which(colnames(P5D) != "window_number")]
   
- 
+  if (nrow(P5D) == 0 | nrow(P4N) == 0 | nrow(P2D) == 0) {
+    warning(paste0("Report for ", id, " failed."), call. = FALSE)
+    return()
+  }
   # Sleep
   shortenTime = function(time) {
     return(paste0(unlist(strsplit(time, ":"))[1:2], collapse = ":"))
@@ -179,6 +182,10 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   
   daydata = merge(P4N, P5D, by = c( "calendar_date","weekday")) #
   daydata = merge(daydata, P2D, by = c("calendar_date", "weekday")) #,
+  if (nrow(daydata) == 0) {
+    warning(paste0("Report for ", id, " failed."), call. = FALSE)
+    return()
+  }
   daydata = daydata[order(daydata$calendar_date), ]
   # Add missing days as empty columns
   
@@ -211,12 +218,16 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
     }
   }
   imputeColumID = which(names(daydata) == labels[13, lang])
-  days_imputed = which(daydata[,imputeColumID] %in% c("0000", "-") == FALSE)
-  if (length(days_imputed) > 0) {
-    daydata$weekday[days_imputed] = paste0(daydata$weekday[days_imputed], "*")
+  if (length(imputeColumID) > 0) {
+    days_imputed = which(daydata[,imputeColumID] %in% c("0000", "-") == FALSE)
+    if (length(days_imputed) > 0) {
+      daydata$weekday[days_imputed] = paste0(daydata$weekday[days_imputed], "*")
+    }
+    daydata = daydata[, -imputeColumID]
+    summaryColumn = summaryColumn[-imputeColumID]
+  } else {
+    summaryColumn = summaryColumn[1:(length(summaryColumn) - 1)]
   }
-  daydata = daydata[, -imputeColumID]
-  summaryColumn = summaryColumn[-imputeColumID]
   daydata = cbind(t(daydata), summaryColumn)
   endSleepSection = 6
   daydata = rbind(daydata[1,],
