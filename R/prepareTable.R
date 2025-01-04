@@ -91,6 +91,17 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
     MINS = paste0(ifelse(MINS < 10, yes = "0", no = ""), MINS)
     return(paste0(HR, "h", MINS, "min"))
   }
+  averageTime = function(x) {
+    x = x[which(!is.na(x) & x != "-" & x != "")] 
+    times = as.POSIXlt(x, format = "%H:%M")
+    before6pm = which(times$hour < 18)
+    if (length(before6pm) > 0) {
+      times[before6pm] = times[before6pm] + 24 * 3600
+    }
+    times = as.POSIXct(mean(as.numeric(times)), tz = "")
+    averageTime = format(times, format = "%H:%M")
+    return(averageTime)
+  }
   
   P4N$sleeponset_ts = unlist(lapply(X = P4N$sleeponset_ts, FUN = shortenTime))
   P4N$wakeup_ts = unlist(lapply(X = P4N$wakeup_ts, FUN = shortenTime))
@@ -141,6 +152,10 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   if (length(validP4N) > 0) {
     SptDuration = as.numeric(P4N[validP4N, labels[7, lang]])
     SleepSptDurationInSpt = as.numeric(P4N[validP4N, labels[8, lang]])
+    Onset = P4N[validP4N, labels[1, lang]]
+    Wakeup = P4N[validP4N, labels[2, lang]]
+    summaryColumn[2] = averageTime(Onset) # onset
+    summaryColumn[3] = averageTime(Wakeup) # wakeup
     summaryColumn[4] = readableHours(mean(SptDuration, rm.na = TRUE))
     summaryColumn[5] = readableHours(mean(SleepSptDurationInSpt, rm.na = TRUE))
     summaryColumn[6] = paste0(round(mean((SleepSptDurationInSpt / SptDuration) * 100,
@@ -173,6 +188,8 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   M5HR = floor(P2D$M5hr_ENMO_mg_0.24hr)
   M5MIN = floor((P2D$M5hr_ENMO_mg_0.24hr - M5HR) * 60)
   P2D$M5hr_ENMO_mg_0.24hr = paste0(M5HR, ":", ifelse(M5MIN < 10, yes = "0", no = ""), M5MIN)
+  summaryColumn[rowIndex + 4] = averageTime(P2D$M5hr_ENMO_mg_0.24hr)
+  
   P2D$calendar_date = as.Date(P2D$calendar_date, format = "%Y-%m-%d")
   names(P2D)[grep(pattern = "M5hr_ENMO_mg_0.24hr", x = names(P2D))] = labels[4, lang]
   
@@ -183,6 +200,11 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
     return()
   }
   daydata = daydata[order(daydata$calendar_date), ]
+  # ignore last day if it has 9 or more missing values,
+  # this indicates a day included in part 2 (M5) but not in part 5
+  if (rev(as.numeric(rowSums(is.na(daydata))))[1] >= 9) {
+    daydata = daydata[-nrow(daydata), ]
+  }
   # Add missing days as empty columns (this will not affect average)
   dRange = range(sort(unique(c(daydata$calendar_date, maskDates))))
   expectedDate = dRange[1]:dRange[2]
