@@ -18,7 +18,7 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   labels[3, ] = c("Moyenne", "Average")
   labels[4, ] = c("D\u00E9but de la p\u00E9riode de 5 heures la plus active", "Start of the most active 5 hour period")
   labels[5, ] = c("Activit\u00E9 en journ\u00E9e:", "Daytime activity:")
-  labels[6, ] = c("Sommeil noturne:", "Nighttime sleep:")
+  labels[6, ] = c("Sommeil nocturne:", "Nighttime sleep:")
   labels[7, ] = c("Temps total \u00E9coul\u00E9 entre l'endormissement et le r\u00E9veil",
                   "Total time from falling asleep to waking up")
   labels[8, ] = c("Temps pass\u00E9 \u00E0 dormir", "Time spent sleeping")
@@ -254,5 +254,13 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   row.names(daydata)[grep(pattern = "weekday", x = row.names(daydata))] = "Day of the week"
   colnames(daydata) = daydata[1,]
   daydata = daydata[-1,]
+  
+  if (length(daydata) > 0) {
+    AbsenceOfSleep = length(grep("-", x = daydata[(nrow(daydata) - 4):nrow(daydata), 1:(ncol(daydata) - 1)], 
+                                 invert = TRUE)) == 0
+    if (AbsenceOfSleep == TRUE) {
+      row.names(daydata)[6] = paste0(row.names(daydata)[6], "*")
+    }
+  }
   return(daydata)
 }
