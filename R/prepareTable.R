@@ -193,8 +193,8 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   P2D$calendar_date = as.Date(P2D$calendar_date, format = "%Y-%m-%d")
   names(P2D)[grep(pattern = "M5hr_ENMO_mg_0.24hr", x = names(P2D))] = labels[4, lang]
   
-  daydata = merge(P4N, P5D, by = c( "calendar_date","weekday"), all = TRUE) #
-  daydata = merge(daydata, P2D, by = c("calendar_date", "weekday"), all = TRUE) #,
+  daydata = merge(P4N, P5D, by = c( "calendar_date","weekday"), all = TRUE)
+  daydata = merge(daydata, P2D, by = c("calendar_date", "weekday"), all.x = TRUE)
   if (nrow(daydata) == 0) {
     warning(paste0("Report for ", id, " failed."), call. = FALSE)
     return()
