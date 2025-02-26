@@ -43,14 +43,17 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   col = c("red", "black",  "blue", "green", "purple")
   
   fns = dir(path, full.names = TRUE, pattern = as.character(id))
-  fns = fns[grep(pattern = "220169C", x = fns, value = FALSE, invert = TRUE)]
+  # fns = fns[grep(pattern = "220169C", x = fns, value = FALSE, invert = TRUE)]
   
   reso = 300
   par(mfcol = c(4, 1), omi = rep(0, 4), oma = c(0, 9, 0, 4), mar = c(4, 4.5, 2, 10))
   
   # identify dates that will be table
   P5D = read.csv(file = paste0(GGIRoutputdir, "/results/part5_daysummary_WW_L40M100V400_T5A5.csv"))
+  P4N = read.csv(file = paste0(GGIRoutputdir, "/results/part4_nightsummary_sleep_cleaned.csv"))
+  
   windows_in_table = P5D[grep(pattern = id, x = P5D$ID), "window_number"]
+  dates_in_part4_table = as.Date(P4N[grep(pattern = id, x = P4N$ID), "calendar_date"])
   
   if (length(grep(pattern = "[.]RData", x = P5ts[grep(id, P5ts)])) > 0) {
     load(file = P5ts[grep(id, basename(P5ts))])
@@ -71,7 +74,9 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
                   x[, timecol] <= timeRange[2]), ]
   }
   # Constrain time series to window range as found in cleaned part 5 report
-  D = D[which(D$window >= min(windows_in_table) & D$window <= max(windows_in_table)), ]
+  D = D[which((D$window >= min(windows_in_table) & D$window <= max(windows_in_table)) |
+                (as.Date(D$time) >= min(dates_in_part4_table) &
+                   as.Date(D$time) <= max(dates_in_part4_table))), ]
   timeRange = range(D$timenum)
   
   D$clocktime = format(D$time,"%H:%M")
@@ -158,12 +163,8 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   Mshort$sib_day
   y0 = 90
   y1 = -90
-  # Set all invalid epochs to NA
+  
   starttime = Mshort$timestamp[1]
-  if (1 %in% D$invalidepoch) {
-    Mshort[which(D$invalidepoch == 1), grep(pattern = "time", x = colnames(Mshort))] = NA
-    LUXTEMP[which(LUXTEMP$nonwearscore >= 2), grep(pattern = "time", x = colnames(LUXTEMP))] = NA
-  }
   
   # prepare Circam data
   fn2 = grep(pattern = as.character(id), x = fns, value =  TRUE)
@@ -175,8 +176,7 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   # add timestamps
   cosvars = SUM$summary[grep(pattern = "cosinor", x = names(SUM$summary), value = TRUE)]
   epochSize = min(diff(cosinor_ts$time_across_days[1:20]) * 3600)
-  cosinor_ts$timestamp = seq(from = starttime,
-                             length.out = length(cosinor_ts$time), by = epochSize)
+  cosinor_ts$timestamp = starttime + (cosinor_ts$time_across_days - cosinor_ts$time_across_days[1]) * 3600
   # downsample to match resolution needed for plot
   cosinor_ts$time_epoch = round(as.numeric(cosinor_ts$timestamp) / reso) * reso
   cosinor_ts2 = aggregate(x = cosinor_ts, by = list(cosinor_ts$time_epoch), FUN = mean)
@@ -191,6 +191,7 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   # Set all invalid epochs to NA
   if (1 %in% D$invalidepoch) {
     Mshort[which(D$invalidepoch == 1), grep(pattern = "time", x = colnames(Mshort))] = NA
+    LUXTEMP[which(LUXTEMP$nonwearscore >= 2), grep(pattern = "time", x = colnames(LUXTEMP))] = NA
   }
   # Mask windows listed in the masking file
   maskDates = NULL
