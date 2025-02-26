@@ -16,7 +16,6 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   labels[1, ] = c("Heure de l'endormissement", "Sleep time") #00E0 is à
   labels[2, ] = c("Heure du r\u00E9veil", "Wake up time")
   labels[3, ] = c("Moyenne", "Average")
-  labels[4, ] = c("D\u00E9but de la p\u00E9riode de 5 heures la plus active", "Start of the most active 5 hour period")
   labels[5, ] = c("Activit\u00E9 en journ\u00E9e:", "Daytime activity:")
   labels[6, ] = c("Sommeil nocturne:", "Nighttime sleep:")
   labels[7, ] = c("Temps total \u00E9coul\u00E9 entre l'endormissement et le r\u00E9veil",
@@ -53,7 +52,7 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
                                               "dur_day_total_LIG_min",
                                               "dur_day_total_IN_min",
                                               "weekday", "calendar_date", "window_number")]
-  summaryColumn = rep("", 11)
+  summaryColumn = rep("", 10)
   P5D$calendar_date = as.Date(P5D$calendar_date, format = "%Y-%m-%d")
   
   
@@ -184,17 +183,8 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   names(P5D)[invar] = labels[12, lang]
   P5D = P5D[order(P5D$calendar_date), ]
   P5D = P5D[, -vigvar]  
-  # M5 timing
-  M5HR = floor(P2D$M5hr_ENMO_mg_0.24hr)
-  M5MIN = floor((P2D$M5hr_ENMO_mg_0.24hr - M5HR) * 60)
-  P2D$M5hr_ENMO_mg_0.24hr = paste0(M5HR, ":", ifelse(M5MIN < 10, yes = "0", no = ""), M5MIN)
-  summaryColumn[rowIndex + 4] = averageTime(P2D$M5hr_ENMO_mg_0.24hr)
-  
-  P2D$calendar_date = as.Date(P2D$calendar_date, format = "%Y-%m-%d")
-  names(P2D)[grep(pattern = "M5hr_ENMO_mg_0.24hr", x = names(P2D))] = labels[4, lang]
-  
+ 
   daydata = merge(P4N, P5D, by = c( "calendar_date","weekday"), all = TRUE)
-  daydata = merge(daydata, P2D, by = c("calendar_date", "weekday"), all.x = TRUE)
   if (nrow(daydata) == 0) {
     warning(paste0("Report for ", id, " failed."), call. = FALSE)
     return()
@@ -250,7 +240,7 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
                   rep("", ncol(daydata)),
                   # matrix("", ifelse(diaryImputationCodeAvailable == FALSE, 2, 1), ncol(daydata)),
                   daydata[2:endSleepSection,])
-  row.names(daydata)[c(2, (endSleepSection + 1))] = labels[5:6, lang]
+  row.names(daydata)[c(2, endSleepSection)] = labels[5:6, lang]
   row.names(daydata)[grep(pattern = "weekday", x = row.names(daydata))] = "Day of the week"
   colnames(daydata) = daydata[1,]
   daydata = daydata[-1,]
