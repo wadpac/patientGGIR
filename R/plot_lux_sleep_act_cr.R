@@ -46,7 +46,7 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   fns = fns[grep(pattern = "220169C", x = fns, value = FALSE, invert = TRUE)]
   
   reso = 300
-  par(mfcol = c(4, 1), omi = rep(0, 4), oma = c(0, 9, 0, 4), mar = c(4, 4.5, 2, 9))
+  par(mfcol = c(4, 1), omi = rep(0, 4), oma = c(0, 9, 0, 4), mar = c(4, 4.5, 2, 10))
   
   # identify dates that will be table
   P5D = read.csv(file = paste0(GGIRoutputdir, "/results/part5_daysummary_WW_L40M100V400_T5A5.csv"))
@@ -213,17 +213,19 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   }
   #==================================
   # plots
-  lab_cex_left = 0.9
-  lab_cex_right = 0.8
+  lab_cex_left = 1.1 #0.9
+  lab_cex_right = 1.1 #0.8
+  lab_cex_below1 = 1.4
+  lab_cex_below2 = 1.4
   layout.matrix <- matrix(c(1, 2, 3, 4), nrow = 4, ncol = 1)
   layout(mat = layout.matrix,
          heights = c(1.5, 1.5, 1.5, 2), # Heights rows
          widths = c(6)) # Widths columns
   #----- LUX
-  par(mar = c(1, 4, 1, 9))
+  par(mar = c(1, 4, 1, 10))
   
   #=== ROW (Light)
-  par(mar = c(0.5, 0.5, 0.1, 9), family = "serif", cex.lab = 1.3, cex.axis = 1, las = 1)
+  par(mar = c(0.5, 0.5, 0.1, 10), family = "serif", cex.lab = 1.3, cex.axis = 1, las = 1)
   plot(LUXTEMP$timestamp, LUXTEMP$lightpeak / 1000, type = "l",
        xlab = "", ylab = "", cex.main = 2,  axes = F, ylim = c(0,  20),
        font.lab = 2, lwd = 0.8, col = "gold2")
@@ -261,7 +263,7 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
       col12 = "blue"
     }
     x0 = Mshort$timestamp[which(delta_sib == 1L)]
-    x1 = Mshort$timestamp[which(delta_sib == -1L)]
+    x1 = Mshort$timestamp[which(delta_sib == -1L) + 1]
     Nrect = min(length(x0),length(x1))
     if (Nrect > 0) {
       for (k in 1:Nrect) { # SIB during SPT
@@ -277,10 +279,10 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
         col = "black", outer = FALSE, font = 2)
   legend("topright", legend = c(labels[5, lang], labels[6, lang]),
          col = c("purple", "blue"),lty = c(1, 1), lwd = c(2.5, 2.5),
-         title = labels[4, lang], inset = c(-0.2, 0), xpd = TRUE, cex = 1.1)
+         title = labels[4, lang], inset = c(-0.12, 0), xpd = TRUE, cex = 1.4)
   
   #==== ROW (Circadian rhythm)
-  par(mar = c(4, 0.5, 0.1, 9))
+  par(mar = c(4, 0.5, 0.1, 10))
   LWD = 1.5
   
   plot(Mshort$timestamp, Mshort$original, type = "l", # pch = 20, cex = 0.2,
@@ -289,9 +291,9 @@ plot_lux_sleep_act_cr = function(GGIRoutputdir, id, lang = "fr", desiredtz = "",
   lines(Mshort$timestamp, Mshort$fittedY, type = "l", # pch = 20, cex = 0.2,
         col = "black", lty = 1, lwd = LWD)
   axis(side = 1, line = 1, at = as.numeric(timeat2), labels = wkday,
-       col = NA, col.ticks = NA, cex.axis = 1.1)
+       col = NA, col.ticks = NA, cex.axis = lab_cex_below1)
   axis(side = 1, line = 0, at = as.numeric(timeat), labels = rep("0h", length(timeat)),
-       cex.axis = 0.8, tick = TRUE) #col = NA, col.ticks = NA,
+       cex.axis = lab_cex_below2, tick = TRUE) #col = NA, col.ticks = NA,
   
   mtext(labels[12, lang], padj = 0, side = 2, line = 1, las = 1, 
         cex = lab_cex_left, col = "black", outer = FALSE, font = 2)

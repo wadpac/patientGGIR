@@ -42,15 +42,16 @@ writeReportTable(data, id, lang)
 
 ```
 
-```{r, echo = FALSE, fig.fullwidth=TRUE, fig.align = "center"}
-
+```{r, echo = FALSE, fig.align = "center", out.width = "550px"}
+#fig.fullwidth=TRUE, 
 # Create png file with plot
 png(filename = plotfile,
-      width = 8, height = 4, res = 300, units = "in")
+      width = 12, height = 8, res = 900, units = "in")
+
 plot_lux_sleep_act_cr(GGIRoutputdir = GGIRoutputdir, id = id, lang = lang,
                       desiredtz = desiredtz, maskingFile = maskingFile)
 invisible(dev.off())
-
+# file.copy(from = plotfile, to = paste0(GGIRoutputdir, "/testpng.png"))
 # Import plot 
-knitr::include_graphics(plotfile)
+knitr::include_graphics(plotfile, auto_pdf = TRUE)
 ```
