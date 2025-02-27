@@ -43,6 +43,6 @@ writeReportTable = function(data, id, lang) {
     column_spec(1, width = "4cm") |>
     row_spec(0, bold = TRUE) |>
     row_spec(1, bold = TRUE) |>
-    row_spec(6, bold = TRUE) |>
+    row_spec(5, bold = TRUE) |>
     kable_styling(font_size = 8)
 }
