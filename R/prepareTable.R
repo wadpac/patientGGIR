@@ -124,7 +124,9 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   rowIndex = 7
   
   # Add diary imputaton code, if present, as final row
-  load(paste0(GGIRoutputdir, "/meta/sleeplog.RData"))
+  sleeplog_RDatafile = dir(path = paste0(GGIRoutputdir, "/meta"), pattern = "sleeplog_", full.names = TRUE)
+  if (length(sleeplog_RDatafile) > 1) stop(paste0("more than one sleeplog RData file found in ", GGIRoutputdir, "/meta"))
+  load(sleeplog_RDatafile)
   impcode = which(logs_diaries$imputecodelog$ID == id)
   diaryImputationCodeAvailable = FALSE
   if (length(impcode) > 0) {
