@@ -34,7 +34,7 @@ writeReportTable = function(data, id, lang) {
   }
   explainAbsenceOfSleep = ifelse(test = AbsenceOfSleep,
                                  yes = paste0("; * ", label2), no = "")
-  kableExtra::kbl(data, booktabs = TRUE) |>
+  kableExtra::kbl(data, booktabs = TRUE, linesep = "") |>
     kableExtra::kable_styling(latex_options = c("striped", "hold_position"), full_width = FALSE) %>%
     footnote(general = paste0("ID: ", id, explainAsterisk, explainAbsenceOfSleep),
              threeparttable = TRUE,
