@@ -4,7 +4,7 @@
 \alias{prepareTable}
 \title{prepareTable}
 \usage{
-prepareTable(GGIRoutputdir, id, lang, maskingFile)
+prepareTable(GGIRoutputdir, id, lang, maskingFile = NULL)
 }
 \arguments{
 \item{GGIRoutputdir}{Path to GGIR output folder, e.g. C:/output_mystudy}

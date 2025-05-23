@@ -9,7 +9,8 @@ plot_lux_sleep_act_cr(
   id,
   lang = "fr",
   desiredtz = "",
-  maskingFile = NULL
+  maskingFile = NULL,
+  onlysleep = FALSE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ plot_lux_sleep_act_cr(
 \item{desiredtz}{Character, timezone from timezone data base names, see also GGIR documentation.}
 
 \item{maskingFile}{Character to point to csv file with dates to be masked per ID}
+
+\item{onlysleep}{Boolean to indicate whether only sleep should be plotted}
 }
 \value{
 no object is returned, only a plot is generated
