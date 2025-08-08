@@ -11,6 +11,7 @@ creatReport(
   desiredtz = "",
   type = NULL,
   deviceName = NULL,
+  quartile_thresholds = NULL,
   maskingFile = NULL
 )
 }
@@ -26,6 +27,8 @@ creatReport(
 \item{type}{Character to specify type of report, current options: onepage_luxsleepactcr_A4}
 
 \item{deviceName}{Character to be used as device name, if not specified then we call it movement sensor}
+
+\item{quartile_thresholds}{Data.frame with thresholds (rows) between the quartiles for 5 variables (columns).}
 
 \item{maskingFile}{Character to point to csv file with dates to be masked per ID}
 }

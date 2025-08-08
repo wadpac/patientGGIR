@@ -4,10 +4,16 @@
 #' @param id Character, the id of the recording
 #' @param lang Character, language to use fr=french, en=english
 #' @param maskingFile Character to point to csv file with dates to be masked per ID
+#' @param quartile_thresholds Data.frame with thresholds (rows) between the quartiles for 5 variables (columns).
 #' @return no object is returned, text is printed with cat
 #' @export
 #' 
-prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
+prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL,
+                        quartile_thresholds = data.frame(MVPA = c("0:15", "0:25", "0:30"),
+                                                         LIPA = c("3:30", "4:30", "5:40"),
+                                                         SB = c("10:00", "10:30", "11:30"),
+                                                         Sleeptime = c("8:00", "8:30", "9:15"),
+                                                         SleepPercentage = c(90, 92,  95))) {
   # labels in multiple languages
   # \u00E0 = à # a with line to the left
   # \u00E9 = é # e with line to the right
@@ -102,6 +108,21 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
     return(averageTime)
   }
   
+  getQlevel = function(x, refv) {
+    if (x < refv[1]) {
+      return("(Q1)")
+    } else if (x >= refv[1] && x < refv[2]) {
+      return("(Q2)")
+    } else if (x >= refv[2] && x < refv[3]) {
+      return("(Q3)")
+    } else if (x >= refv[3]) {
+      return("(Q4)")
+    }
+  }
+  convert_to_hour = function(x) {
+    return(sum(as.numeric(unlist(strsplit(x, ":"))) / c(1, 60)))
+  }
+  
   P4N$sleeponset_ts = unlist(lapply(X = P4N$sleeponset_ts, FUN = shortenTime))
   P4N$wakeup_ts = unlist(lapply(X = P4N$wakeup_ts, FUN = shortenTime))
   P4N$calendar_date = as.Date(P4N$calendar_date, format = "%Y-%m-%d")
@@ -158,9 +179,16 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
     summaryColumn[2] = averageTime(Onset) # onset
     summaryColumn[3] = averageTime(Wakeup) # wakeup
     summaryColumn[4] = readableHours(mean(SptDuration, rm.na = TRUE))
-    summaryColumn[5] = readableHours(mean(SleepSptDurationInSpt, rm.na = TRUE))
-    summaryColumn[6] = paste0(round(mean((SleepSptDurationInSpt / SptDuration) * 100,
-                                         rm.na = TRUE)), "%")
+    
+    meansleep = mean(SleepSptDurationInSpt, rm.na = TRUE)
+    thresholds_sleep = unlist(lapply(quartile_thresholds$Sleeptime, convert_to_hour))
+    Qlevelsleep = getQlevel(meansleep, thresholds_sleep)
+    summaryColumn[5] = paste(readableHours(meansleep), Qlevelsleep)
+    
+    meanSleepPercentage = round(mean((SleepSptDurationInSpt / SptDuration) * 100,
+                           rm.na = TRUE))
+    Qlevelsleep = getQlevel(meanSleepPercentage, quartile_thresholds$SleepPercentage)
+    summaryColumn[6] = paste0(meanSleepPercentage, "% ", Qlevelsleep)
   }
   P4N[, labels[7, lang]] = unlist(lapply(X = P4N[, labels[7, lang]], FUN = readableHours))
   P4N[, labels[8, lang]] = unlist(lapply(X = P4N[, labels[8, lang]], FUN = readableHours))
@@ -172,9 +200,21 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL) {
   ligvar = grep(pattern = "total_LIG", x = names(P5D))
   invar = grep(pattern = "total_IN", x = names(P5D))
   P5D[, modvar] = P5D[, modvar] + P5D[, vigvar] # MVPA
-  summaryColumn[rowIndex + 1] = readableHours(mean(P5D[, modvar], rm.na = TRUE) / 60)
-  summaryColumn[rowIndex + 2] = readableHours(mean(P5D[, ligvar], rm.na = TRUE) / 60)
-  summaryColumn[rowIndex + 3] = readableHours(mean(P5D[, invar], rm.na = TRUE) / 60)
+  
+  meanMVPA = mean(P5D[, modvar], rm.na = TRUE) / 60
+  thresholds_MVPA = unlist(lapply(quartile_thresholds$MVPA, convert_to_hour))
+  QlevelMVPA = getQlevel(meanMVPA, thresholds_MVPA)
+  summaryColumn[rowIndex + 1] = paste(readableHours(meanMVPA), QlevelMVPA)
+  
+  meanLIPA = mean(P5D[, ligvar], rm.na = TRUE) / 60
+  thresholds_LIPA = unlist(lapply(quartile_thresholds$LIPA, convert_to_hour))
+  QlevelLIPA = getQlevel(meanLIPA, thresholds_LIPA)
+  summaryColumn[rowIndex + 2] = paste(readableHours(meanLIPA), QlevelLIPA)
+  
+  meanSB = mean(P5D[, invar], rm.na = TRUE) / 60
+  thresholds_SB = unlist(lapply(quartile_thresholds$SB, convert_to_hour))
+  QlevelSB = getQlevel(meanSB, thresholds_SB)
+  summaryColumn[rowIndex + 3] = paste(readableHours(meanSB), QlevelSB)
   
   P5D[, modvar] = unlist(lapply(X = P5D[, modvar] / 60, FUN = readableHours))
   P5D[, ligvar] = unlist(lapply(X = P5D[, ligvar] / 60, FUN = readableHours))

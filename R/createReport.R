@@ -6,12 +6,15 @@
 #' @param desiredtz Character, timezone from timezone data base names, see also GGIR documentation.
 #' @param type Character to specify type of report, current options: onepage_luxsleepactcr_A4
 #' @param deviceName Character to be used as device name, if not specified then we call it movement sensor
+#' @param quartile_thresholds Data.frame with thresholds (rows) between the quartiles for 5 variables (columns).
 #' @param maskingFile Character to point to csv file with dates to be masked per ID
 #' @return no object is returned, a pdf is saves is save in the GGIr output directory
 #' @export
 #' 
-creatReport = function(GGIRoutputdir = NULL, lang = "fr", idsep = "_", desiredtz = "", type = NULL,
-                       deviceName = NULL, maskingFile = NULL) {
+creatReport = function(GGIRoutputdir = NULL, lang = "fr", 
+                       idsep = "_", desiredtz = "", type = NULL,
+                       deviceName = NULL, quartile_thresholds = NULL,
+                       maskingFile = NULL) {
   
   # Check input  
   if (!is.null(type)) {
@@ -30,6 +33,9 @@ creatReport = function(GGIRoutputdir = NULL, lang = "fr", idsep = "_", desiredtz
     stop("Please specific argument GGIRoutputdir.", call. = FALSE)
   }
   
+  if (is.null(quartile_thresholds)) {
+    stop("Please specific argument quartile_thresholds.", call. = FALSE)
+  }
   # Extract ids to process
   getID = function(x) {
      return(unlist(strsplit(x, idsep))[1])
@@ -62,7 +68,8 @@ creatReport = function(GGIRoutputdir = NULL, lang = "fr", idsep = "_", desiredtz
         output_file = pdffilename,
         output_dir = GGIRoutputdir,
         params = list(GGIRoutputdir = GGIRoutputdir, id = id, plotfile = plotfile, lang = lang, desiredtz = desiredtz, docTitle = docTitle,
-                      deviceName = deviceName, maskingFile = maskingFile))
+                      deviceName = deviceName, maskingFile = maskingFile,
+                      quartile_thresholds = quartile_thresholds))
       if (file.exists(plotfile)) file.remove(plotfile)
       file.rename(from = paste0(GGIRoutputdir, "/", pdffilename),
                 to = paste0(reportDir, "/", pdffilename))

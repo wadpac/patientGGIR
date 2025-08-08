@@ -3,6 +3,7 @@ geometry: margin=1cm
 output: pdf_document
 classoption: a4paper
 title: "`r docTitle`"
+subtitle: "`r id`"
 header-includes:
 - \usepackage{booktabs}
 - \usepackage{longtable}
@@ -35,7 +36,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r, echo = FALSE}
-data = prepareTable(GGIRoutputdir, id, lang, maskingFile) 
+data = prepareTable(GGIRoutputdir, id, lang, maskingFile, quartile_thresholds) 
 
 # Write table to report
 writeReportTable(data, id, lang)
