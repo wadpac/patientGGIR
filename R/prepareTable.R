@@ -21,7 +21,7 @@ prepareTable = function(GGIRoutputdir, id, lang, maskingFile = NULL,
   labels = matrix("", 13, 2)
   labels[1, ] = c("Heure de l'endormissement", "Sleep time") #00E0 is à
   labels[2, ] = c("Heure du r\u00E9veil", "Wake up time")
-  labels[3, ] = c("Moyenne", "Average")
+  labels[3, ] = c("Moyenne #", "Average #")
   labels[5, ] = c("Activit\u00E9 en journ\u00E9e:", "Daytime activity:")
   labels[6, ] = c("Sommeil nocturne:", "Nighttime sleep:")
   labels[7, ] = c("Temps total \u00E9coul\u00E9 entre l'endormissement et le r\u00E9veil",

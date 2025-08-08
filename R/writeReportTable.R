@@ -16,7 +16,7 @@ writeReportTable = function(data, id, lang) {
     label2 = paste0("En l’absence d’information du questionnaire journalier, il ",
                     "n’a pas été possible de distinguer les périodes de sommeil ",
                     "diurnes et nocturnes.")
-    explainQ1234 = paste0("Les désignations Q1, Q2, Q3 et Q4 correspondent \u00E1 ",
+    explainQ1234 = paste0("# Les désignations Q1, Q2, Q3 et Q4 correspondent \u00E1 ",
                           "votre appartenance au 1er 2\u00E9me, 3\u00E9me ",
                           "ou 4\u00E9me quartile de la ",
                           "population des patients participant \u00E1 l'étude.")
@@ -26,7 +26,7 @@ writeReportTable = function(data, id, lang) {
     label2 = paste0("In the absence of information from the daily questionnaire, ",
                     "it was not possible to distinguish daytime and nighttime ",
                     "sleep periods.")
-    explainQ1234 = paste0("The designations Q1, Q2, Q3, and Q4 correspond to ",
+    explainQ1234 = paste0("# The designations Q1, Q2, Q3, and Q4 correspond to ",
                           "your membership in the 1st, 2nd, 3rd, ",
                           "or 4th quartile of the ",
                           "patient population participating in the study.")
