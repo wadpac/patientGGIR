@@ -17,8 +17,8 @@ writeReportTable = function(data, id, lang) {
                     "n’a pas été possible de distinguer les périodes de sommeil ",
                     "diurnes et nocturnes.")
     explainQ1234 = paste0("# Les désignations Q1, Q2, Q3 et Q4 correspondent \u00E1 ",
-                          "votre appartenance au 1er 2\u00E9me, 3\u00E9me ",
-                          "ou 4\u00E9me quartile de la ",
+                          "votre appartenance au 1er, 2\u00E8me, 3\u00E8me ",
+                          "ou 4\u00E8me quartile de la ",
                           "population des patients participant \u00E1 l'étude.")
   } else if (lang == "en") {
     label1 = paste0("In the absence of information from the daily questionnaire ",
