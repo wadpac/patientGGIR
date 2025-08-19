@@ -1,4 +1,4 @@
-#' creatReport
+#' createReport
 #'
 #' @param GGIRoutputdir Path to GGIR output folder, e.g. C:/output_mystudy
 #' @param lang Character, language to use fr=french, en=english
@@ -11,7 +11,7 @@
 #' @return no object is returned, a pdf is saves is save in the GGIr output directory
 #' @export
 #' 
-creatReport = function(GGIRoutputdir = NULL, lang = "fr", 
+createReport = function(GGIRoutputdir = NULL, lang = "fr", 
                        idsep = "_", desiredtz = "", type = NULL,
                        deviceName = NULL, quartile_thresholds = NULL,
                        maskingFile = NULL) {

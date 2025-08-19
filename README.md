@@ -21,14 +21,28 @@ remotes::install_github("wadpac/patientGGIR", dependencies = TRUE)
 
 - Run GGIR as you normally do
 
-- Specify path to GGIR output folder, e.g.
+- Create an R script where you define the `quartile_thresholds` to be used as reference:
 
 ```
-creatReport(GGIRoutputdir = "C:/output_pilot",
+
+quartile_thresholds = data.frame(MVPA = c("0:15", "0:25", "0:30"),
+                                 LIPA = c("3:30", "4:30", "5:40"),
+                                 SB = c("10:00", "10:30", "11:30"),
+                                 Sleeptime = c("8:00", "8:30", "9:15"),
+                                 SleepPercentage = c(90, 92,  95))
+```
+
+The above example would indicate that the threshold between the first and second quartile in time spent
+in MVPA is 0 hours and 15 minutes.
+
+- Next, specify the `createReport()` function call, including the path to the GGIR output folder:
+```
+createReport(GGIRoutputdir = "C:/output_pilot",
             lang = "fr",
             idsep = "_",
             desiredtz = "Europe/Paris",
-            type = "onepage_luxsleepactcr_A4")
+            type = "onepage_luxsleepactcr_A4",
+            quartile_thresholds = quartile_thresholds)
           
 ```
 
