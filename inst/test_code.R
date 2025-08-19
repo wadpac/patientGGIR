@@ -25,7 +25,11 @@ GGIRoutputdir = "D:/Projects/ERC_Paris/Clinic/output_realCircameData"
 maskingFile = "D:/Projects/ERC_Paris/Clinic/output_realCircameData/maskingFile.csv"
 idsep = "_"
 lang = "fr" #"fr" "en"
-
+quartile_thresholds = data.frame(MVPA = c("0:15", "0:25", "0:30"),
+                                 LIPA = c("3:30", "4:30", "5:40"),
+                                 SB = c("10:00", "10:30", "11:30"),
+                                 Sleeptime = c("8:00", "8:30", "9:15"),
+                                 SleepPercentage = c(90, 92,  95))
 # # # ================================================
 # source("R/plot_lux_sleep_act_cr.R")
 # getID = function(x) {
@@ -51,7 +55,9 @@ lang = "fr" #"fr" "en"
 # }
 # ids = unlist(lapply(dir(paste0(GGIRoutputdir, "/meta/basic"), full.names = FALSE), FUN = getID))
 # 
-# data = prepareTable(GGIRoutputdir, id = grep("Z010195EM",ids, value = TRUE), lang) #maskingFile = maskingFile
+# data = prepareTable(GGIRoutputdir, id = grep("Z010195EM", ids, value = TRUE),
+#                     lang = lang,
+#                     quartile_thresholds = quartile_thresholds) #maskingFile = maskingFile
 # # No sleep example: C010066EM
 # # Normal example: C010001OA
 # kkk
@@ -59,5 +65,6 @@ lang = "fr" #"fr" "en"
 creatReport(GGIRoutputdir = GGIRoutputdir,
             lang = lang, idsep = idsep, desiredtz = "Europe/Paris",
             type = "onepage_luxsleepactcr_A4",
-            deviceName = "GENEActiv", maskingFile = NULL) #maskingFile)
+            deviceName = "GENEActiv", quartile_thresholds = quartile_thresholds,
+            maskingFile = NULL) #maskingFile)
 

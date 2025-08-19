@@ -1,8 +1,10 @@
 ---
-geometry: margin=1cm
+geometry: "left=1cm,right=1cm,top=1.8cm,bottom=1cm"
 output: pdf_document
 classoption: a4paper
-title: "`r docTitle`"
+title: >
+  `\vspace{-1.3cm}`{=latex}
+  `r docTitle`
 header-includes:
 - \usepackage{booktabs}
 - \usepackage{longtable}
@@ -19,6 +21,12 @@ header-includes:
 - \usepackage{makecell}
 - \usepackage{titlesec}
 - \titlespacing{\title}{0pt}{\parskip}{-\parskip}
+- \usepackage{fancyhdr}
+- \fancypagestyle{plain}{}
+- \pagestyle{fancy}
+- \rhead{`r id`}
+- \renewcommand{\headrulewidth}{0pt} % remove rule below header
+
 ---
 
 \vspace{-10truemm}
@@ -35,7 +43,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r, echo = FALSE}
-data = prepareTable(GGIRoutputdir, id, lang, maskingFile) 
+data = prepareTable(GGIRoutputdir, id, lang, maskingFile, quartile_thresholds) 
 
 # Write table to report
 writeReportTable(data, id, lang)
@@ -46,7 +54,7 @@ writeReportTable(data, id, lang)
 #fig.fullwidth=TRUE, 
 # Create png file with plot
 png(filename = plotfile,
-      width = 12, height = 8, res = 900, units = "in")
+      width = 12, height = 7.5, res = 900, units = "in")
 
 plot_lux_sleep_act_cr(GGIRoutputdir = GGIRoutputdir, id = id, lang = lang,
                       desiredtz = desiredtz, maskingFile = maskingFile)

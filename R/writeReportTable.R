@@ -16,12 +16,20 @@ writeReportTable = function(data, id, lang) {
     label2 = paste0("En l’absence d’information du questionnaire journalier, il ",
                     "n’a pas été possible de distinguer les périodes de sommeil ",
                     "diurnes et nocturnes.")
+    explainQ1234 = paste0("# Les désignations Q1, Q2, Q3 et Q4 correspondent \u00E1 ",
+                          "votre appartenance au 1er, 2\u00E8me, 3\u00E8me ",
+                          "ou 4\u00E8me quartile de la ",
+                          "population des patients participant \u00E1 l'étude.")
   } else if (lang == "en") {
     label1 = paste0("In the absence of information from the daily questionnaire ",
                     "for this day, this information could be of lower quality.")
     label2 = paste0("In the absence of information from the daily questionnaire, ",
-                   "it was not possible to distinguish daytime and nighttime ",
-                   "sleep periods.")
+                    "it was not possible to distinguish daytime and nighttime ",
+                    "sleep periods.")
+    explainQ1234 = paste0("# The designations Q1, Q2, Q3, and Q4 correspond to ",
+                          "your membership in the 1st, 2nd, 3rd, ",
+                          "or 4th quartile of the ",
+                          "patient population participating in the study.")
   }
   AsteriskInColumns =  length(grep(pattern = "[*]", x = colnames(data))) > 0
   explainAsterisk = ifelse(test = AsteriskInColumns,
@@ -36,7 +44,8 @@ writeReportTable = function(data, id, lang) {
                                  yes = paste0("; * ", label2), no = "")
   kableExtra::kbl(data, booktabs = TRUE, linesep = "") |>
     kableExtra::kable_styling(latex_options = c("striped", "hold_position"), full_width = FALSE) %>%
-    footnote(general = paste0("ID: ", id, explainAsterisk, explainAbsenceOfSleep),
+    # "ID: ", id, "; ",
+    footnote(general = paste0(explainQ1234, explainAsterisk, explainAbsenceOfSleep),
              threeparttable = TRUE,
              footnote_as_chunk = TRUE,
              general_title = "") |>

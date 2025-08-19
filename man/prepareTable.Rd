@@ -4,7 +4,15 @@
 \alias{prepareTable}
 \title{prepareTable}
 \usage{
-prepareTable(GGIRoutputdir, id, lang, maskingFile = NULL)
+prepareTable(
+  GGIRoutputdir,
+  id,
+  lang,
+  maskingFile = NULL,
+  quartile_thresholds = data.frame(MVPA = c("0:15", "0:25", "0:30"), LIPA = c("3:30",
+    "4:30", "5:40"), SB = c("10:00", "10:30", "11:30"), Sleeptime = c("8:00", "8:30",
+    "9:15"), SleepPercentage = c(90, 92, 95))
+)
 }
 \arguments{
 \item{GGIRoutputdir}{Path to GGIR output folder, e.g. C:/output_mystudy}
@@ -14,6 +22,8 @@ prepareTable(GGIRoutputdir, id, lang, maskingFile = NULL)
 \item{lang}{Character, language to use fr=french, en=english}
 
 \item{maskingFile}{Character to point to csv file with dates to be masked per ID}
+
+\item{quartile_thresholds}{Data.frame with thresholds (rows) between the quartiles for 5 variables (columns).}
 }
 \value{
 no object is returned, text is printed with cat
