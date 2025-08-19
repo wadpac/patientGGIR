@@ -3,7 +3,7 @@ geometry: "left=1cm,right=1cm,top=1.8cm,bottom=1cm"
 output: pdf_document
 classoption: a4paper
 title: >
-  `\vspace{-2.2cm}`{=latex}
+  `\vspace{-1.3cm}`{=latex}
   `r docTitle`
 header-includes:
 - \usepackage{booktabs}
