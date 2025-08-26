@@ -1,6 +1,6 @@
-# patientGGIR
+# patientReportGGIR
 
-**patientGGIR** is an R package to help generate patient reports from the output of R package GGIR.
+**patientReportGGIR** is an R package to help generate patient reports from the output of R package GGIR.
 
 ## Installation
 
@@ -14,7 +14,7 @@
   
 ```
 install.packages(pkgs = "remotes",  dependencies = TRUE)
-remotes::install_github("wadpac/patientGGIR", dependencies = TRUE)
+remotes::install_github("wadpac/patientReportGGIR", dependencies = TRUE)
 ```
 
 ## Usage

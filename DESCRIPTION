@@ -1,6 +1,6 @@
-Package: patientGGIR
+Package: patientReportGGIR
 Type: Package
-Title: Creat Patient Reports From GGIR Output
+Title: Create Patient Reports Based On GGIR Output
 Version: 0.0.2
 Date: 2025-08-26
 Authors@R: c(person("Vincent T","van Hees",role=c("aut","cre"),
