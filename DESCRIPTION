@@ -12,6 +12,6 @@ BugReports: https://github.com/wadpac/patientGGIR/issues
 License: Apache License (== 2.0)
 Suggests: knitr, tinytex
 Imports: kableExtra, extrafont, rmarkdown, data.table
-Depends: utils, R (>= 3.5.0)
+Depends: utils, R (>= 4.1.0)
 Encoding: UTF-8
 RoxygenNote: 7.3.2
