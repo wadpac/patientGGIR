@@ -2,7 +2,7 @@ Package: patientGGIR
 Type: Package
 Title: Creat Patient Reports From GGIR Output
 Version: 0.0.1
-Date: 2024-04-19
+Date: 2025-08-26
 Authors@R: c(person("Vincent T","van Hees",role=c("aut","cre"),
                   email="v.vanhees@accelting.com"))
 Maintainer: Vincent T van Hees <v.vanhees@accelting.com>

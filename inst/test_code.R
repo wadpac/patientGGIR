@@ -4,11 +4,11 @@ graphics.off()
 # On Windows: install tabu package: https://stackoverflow.com/questions/47613096/tabu-sty-not-found
 library(patientGGIR)
 library(kableExtra)
-source("R/createReport.R")
-source("R/plot_lux_sleep_act_cr.R")
-source("R/prepareTable.R")
-source("R/introText.R")
-source("R/writeReportTable.R")
+# source("R/createReport.R")
+# source("R/plot_lux_sleep_act_cr.R")
+# source("R/prepareTable.R")
+# source("R/introText.R")
+# source("R/writeReportTable.R")
 # GGIRoutputdir = "D:/Dropbox/Work/sharedfolder/projects/ERC_Paris/Clinic/output_pilot2022"
 # idsep = "_"
 # GGIRoutputdir = "D:/Dropbox/Work/sharedfolder/projects/ERC_Paris/Clinic/Circame_2024_bin/output_S20_2024_copie"
@@ -62,7 +62,7 @@ quartile_thresholds = data.frame(MVPA = c("0:15", "0:25", "0:30"),
 # # Normal example: C010001OA
 # kkk
 # Run code as called from within Markdown
-creatReport(GGIRoutputdir = GGIRoutputdir,
+createReport(GGIRoutputdir = GGIRoutputdir,
             lang = lang, idsep = idsep, desiredtz = "Europe/Paris",
             type = "onepage_luxsleepactcr_A4",
             deviceName = "GENEActiv", quartile_thresholds = quartile_thresholds,
