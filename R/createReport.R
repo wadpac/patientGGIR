@@ -19,7 +19,7 @@ createReport = function(GGIRoutputdir = NULL, lang = "fr",
   # Check input  
   if (!is.null(type)) {
     if (type == "onepage_luxsleepactcr_A4") {
-      type_template = system.file("templates/onepage_luxsleepactcr_A4.Rmd", package = "patientGGIR")[1]
+      type_template = system.file("templates/onepage_luxsleepactcr_A4.Rmd", package = "patientReportGGIR")[1]
     } else {
       stop(paste0("Value for type (", type, ") is not facilitated"), call. = FALSE)
     }
