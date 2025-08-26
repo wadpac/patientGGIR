@@ -12,14 +12,14 @@
 writeReportTable = function(data, id, lang) {
   if (lang == "fr") {
     label1 = paste0("En l'absence d'information du questionnaire journalier pour",
-                    " ce jour, ces informations pourraient être de qualité moindre.")
-    label2 = paste0("En l’absence d’information du questionnaire journalier, il ",
-                    "n’a pas été possible de distinguer les périodes de sommeil ",
+                    " ce jour, ces informations pourraient \u00EAtre de qualit\u00E9 moindre.")
+    label2 = paste0("En l'absence d'information du questionnaire journalier, il ",
+                    "n'a pas \u00E9t\u00E9 possible de distinguer les p\u00E9riodes de sommeil ",
                     "diurnes et nocturnes.")
-    explainQ1234 = paste0("# Les désignations Q1, Q2, Q3 et Q4 correspondent \u00E1 ",
+    explainQ1234 = paste0("# Les d\u00E9signations Q1, Q2, Q3 et Q4 correspondent \u00E1 ",
                           "votre appartenance au 1er, 2\u00E8me, 3\u00E8me ",
                           "ou 4\u00E8me quartile de la ",
-                          "population des patients participant \u00E1 l'étude.")
+                          "population des patients participant \u00E1 l'\u00E9tude.")
   } else if (lang == "en") {
     label1 = paste0("In the absence of information from the daily questionnaire ",
                     "for this day, this information could be of lower quality.")
